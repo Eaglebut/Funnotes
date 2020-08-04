@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
      class myTask extends AsyncTask<Void, Void, List<Event>>{
 
         @Override
@@ -49,7 +48,5 @@ public class MainActivity extends AppCompatActivity {
             ListView listView = findViewById(R.id.list_view);
             listView.setAdapter(adapter);
         }
-
     }
-
 }
