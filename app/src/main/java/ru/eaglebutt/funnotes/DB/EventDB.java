@@ -10,11 +10,11 @@ import androidx.room.RoomDatabase;
 @Database(entities = {Event.class}, version = 1)
 public abstract class EventDB extends RoomDatabase {
 
-    abstract EventList eventList();
+    public abstract EventList eventList();
     private static final String DB_NAME = "events.db";
     private static volatile EventDB INSTANCE = null;
 
-    synchronized static EventDB get(Context context){
+    public synchronized static EventDB get(Context context){
         if (INSTANCE == null){
             INSTANCE = create(context, false);
         }

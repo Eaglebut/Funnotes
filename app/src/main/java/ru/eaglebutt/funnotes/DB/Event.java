@@ -10,15 +10,36 @@ import java.sql.Timestamp;
 @Entity(tableName = "events")
 public class Event {
 
+
     @PrimaryKey(autoGenerate = true)
     private int id;
-    private Timestamp start_time;
-    private Timestamp end_time;
+    private long start_time;
+    private long end_time;
     @NonNull
     private String title;
     private String description;
-    private Timestamp last_update;
+    private long last_update;
 
+    public Event() {
+    }
+
+    @Ignore
+    public Event(int id, long start_time, long end_time, @NonNull String title, String description) {
+        this.id = id;
+        this.start_time = start_time;
+        this.end_time = end_time;
+        this.title = title;
+        this.description = description;
+    }
+    @Ignore
+    public Event(int id, long start_time, long end_time, @NonNull String title, String description, long last_update) {
+        this.id = id;
+        this.start_time = start_time;
+        this.end_time = end_time;
+        this.title = title;
+        this.description = description;
+        this.last_update = last_update;
+    }
 
     public int getId() {
         return id;
@@ -28,19 +49,19 @@ public class Event {
         this.id = id;
     }
 
-    public Timestamp getStart_time() {
+    public long getStart_time() {
         return start_time;
     }
 
-    public void setStart_time(Timestamp start_time) {
+    public void setStart_time(long start_time) {
         this.start_time = start_time;
     }
 
-    public Timestamp getEnd_time() {
+    public long getEnd_time() {
         return end_time;
     }
 
-    public void setEnd_time(Timestamp end_time) {
+    public void setEnd_time(long end_time) {
         this.end_time = end_time;
     }
 
@@ -61,23 +82,22 @@ public class Event {
         this.description = description;
     }
 
-    public Timestamp getLast_update() {
+    public long getLast_update() {
         return last_update;
     }
 
-    public void setLast_update(){
-        last_update = new Timestamp(System.currentTimeMillis());
+    public void setLast_update(long last_update) {
+        this.last_update = last_update;
     }
-
 
     @Ignore
     public Event(int id, Timestamp start_time, Timestamp end_time, @NonNull String title, String description) {
         this.id = id;
-        this.start_time = start_time;
-        this.end_time = end_time;
+        this.start_time = start_time.getTime();
+        this.end_time = end_time.getTime();
         this.title = title;
         this.description = description;
-        this.last_update = null;
+        this.last_update = 0;
     }
 
     @Override
