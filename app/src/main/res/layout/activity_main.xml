@@ -5,10 +5,18 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <ListView
+    <!--ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="100dp"
         tools:layout_editor_absoluteY="100dp"
-        android:id="@+id/list_view"/>
+        android:id="@+id/list_view"/-->
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:text="TEST"
+        android:textSize="28sp"
+        android:id="@+id/text_data"
+        />
 </LinearLayout>
