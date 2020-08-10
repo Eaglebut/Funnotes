@@ -1,42 +1,25 @@
 package ru.eaglebutt.funnotes;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.AsyncTask;
+
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import ru.eaglebutt.funnotes.API.APIConfig;
 import ru.eaglebutt.funnotes.API.APIServiceConstructor;
 import ru.eaglebutt.funnotes.API.AllUsersResponseData;
-import ru.eaglebutt.funnotes.API.GetAllUserService;
-import ru.eaglebutt.funnotes.DB.Event;
-import ru.eaglebutt.funnotes.DB.EventDB;
-import ru.eaglebutt.funnotes.DB.EventList;
+import ru.eaglebutt.funnotes.API.Event;
+import ru.eaglebutt.funnotes.API.User;
+import ru.eaglebutt.funnotes.API.UserService;
 
 public class MainActivity extends AppCompatActivity {
-
-    EventDB db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,28 +28,238 @@ public class MainActivity extends AppCompatActivity {
         //db = EventDB.get(getApplicationContext());
         //new myTask().execute();
         final TextView textView = findViewById(R.id.text_data);
+        final Button addUserButton = findViewById(R.id.addUser);
+        final Button getUserButton = findViewById(R.id.getUser);
+        final Button updateUserButton = findViewById(R.id.updateUser);
+        final Button deleteUserButton = findViewById(R.id.deleteUser);
+        final Button addEventButton = findViewById(R.id.addEvent);
+        final Button getEventButton = findViewById(R.id.getEvent);
+        final Button updateEventButton = findViewById(R.id.updateEvent);
+        final Button deleteEventButton = findViewById(R.id.deleteEvent);
+        final Button getAllButton = findViewById(R.id.getAll);
+        final EditText editText = findViewById(R.id.edit_text);
 
+        User user = new User();
+        user.setId(0);
+        user.setEmail("test@test.test");
+        user.setPassword("user");
+        user.setName("Testuser");
+        user.setSurname("Testsurname");
 
-        GetAllUserService service = APIServiceConstructor.createService(GetAllUserService.class);
+        Event event = new Event();
+        event.setTitle("test");
+        event.setDescription("description");
+        event.setStartTime(System.currentTimeMillis());
+        event.setEndTime(System.currentTimeMillis() + 500000);
 
-        Call<AllUsersResponseData> dataCall = service.getAllUserData(APIConfig.email, APIConfig.password);
+        UserService service = APIServiceConstructor.createService(UserService.class);
 
-        dataCall.enqueue(new Callback<AllUsersResponseData>() {
-            @Override
-            public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
-                if (response.body() != null){
-                    textView.setText(response.body().toString());
+        getAllButton.setOnClickListener(v -> {
+            Call<AllUsersResponseData> getAllCall = service.getAllUserData(user.getEmail(), user.getPassword());
+            getAllCall.enqueue(new Callback<AllUsersResponseData>() {
+                @Override
+                public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
+                    if (response.code() == 200){
+                        if (response.body() != null){
+                            textView.setText(response.body().toString());
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Пустое тело", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    else if(response.code() == 403){
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
                 }
-            }
 
-            @Override
-            public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                Log.d("Error API", t.getMessage() );
-            }
+                @Override
+                public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+
+                }
+            });
         });
-    }
 
+        addUserButton.setOnClickListener(v -> {
+            user.setName("Notchanged");
+            Call<Void> putUser = service.putUser(user);
+            putUser.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        getUserButton.setOnClickListener(v -> {
+            Call<User> userCall = service.getUser(user.getEmail(), user.getPassword());
+            userCall.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    if (response.body() != null){
+                        textView.setText(response.body().toString());
+                    }
+                    else {
+                        textView.setText("");
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        deleteUserButton.setOnClickListener(v -> {
+            Call<Void> deleteUser = service.deleteUser(user.getEmail(),user.getPassword());
+            deleteUser.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.code() == 403){
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        updateUserButton.setOnClickListener(v -> {
+            user.setName("Changed");
+            Call<Void> updateCall = service.updateUser(user.getEmail(),user.getPassword(), user);
+            updateCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.code() == 200){
+                        Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        addEventButton.setOnClickListener(v -> {
+            event.setTitle("Test");
+            event.setId(0);
+            Call<Void> putEventCall = service.putEvent(user.getEmail(), user.getPassword(), event);
+            putEventCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.code() == 200){
+                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
+
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        getEventButton.setOnClickListener(v -> {
+            int id = Integer.parseInt(editText.getText().toString());
+            Call<Event> getEventCall = service.getEvent(user.getEmail(), user.getPassword(), id);
+            getEventCall.enqueue(new Callback<Event>() {
+                @Override
+                public void onResponse(Call<Event> call, Response<Event> response) {
+                    if (response.code() == 200){
+                        if (response.body() != null){
+                            textView.setText(response.body().toString());
+                        }
+                        else {
+                            Toast.makeText(getApplicationContext(), "Пустое тело", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Event> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        deleteEventButton.setOnClickListener(v -> {
+            int id = Integer.parseInt(editText.getText().toString());
+            Call<Void> deleteEventCall = service.deleteEvent(user.getEmail(), user.getPassword(), id);
+            deleteEventCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.code() == 200){
+                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+
+        updateEventButton.setOnClickListener(v -> {
+            int id = Integer.parseInt(editText.getText().toString());
+            event.setTitle("Updated");
+            event.setId(id);
+            Call<Void> updateEventCall = service.putEvent(user.getEmail(), user.getPassword(), event);
+            updateEventCall.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    if (response.code() == 200){
+                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
+                }
+            });
+
+        });
+
+
+
+
+
+
+    }
+/*
      class myTask extends AsyncTask<Void, Void, List<Event>>{
 
         @Override
@@ -86,4 +279,6 @@ public class MainActivity extends AppCompatActivity {
             //listView.setAdapter(adapter);
         }
     }
+
+ */
 }
