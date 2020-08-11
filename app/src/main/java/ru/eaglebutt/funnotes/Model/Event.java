@@ -1,8 +1,12 @@
-package ru.eaglebutt.funnotes.API;
+package ru.eaglebutt.funnotes.Model;
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "events")
 public class Event {
 
     @SerializedName("start_time")
@@ -16,6 +20,7 @@ public class Event {
     private String description;
     @SerializedName("id")
     @Expose
+    @PrimaryKey(autoGenerate = true)
     private int id;
     @SerializedName("title")
     @Expose

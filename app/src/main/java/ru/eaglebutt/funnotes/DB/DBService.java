@@ -2,15 +2,23 @@ package ru.eaglebutt.funnotes.DB;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
-import androidx.room.Ignore;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
 import java.util.List;
 
+import ru.eaglebutt.funnotes.Model.Event;
+import ru.eaglebutt.funnotes.Model.User;
+
 @Dao
-public interface EventList {
+public interface DBService {
+
+    @Query("DELETE FROM user")
+    void deleteUser();
+
+    @Query("SELECT * from user")
+    List<User> getUser();
 
     @Query("SELECT * from events")
     List<Event> getEvents();
@@ -27,9 +35,17 @@ public interface EventList {
     @Insert
     void insert(List<Event> eventList);
 
+    @Insert
+    void insert(User user);
+
     @Delete
     void delete(Event event);
+    @Delete
+    void delete(User user);
 
     @Update
     void update(Event event);
+
+    @Update
+    void update(User user);
 }

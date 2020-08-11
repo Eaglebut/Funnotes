@@ -3,6 +3,7 @@ package ru.eaglebutt.funnotes;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,9 +16,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import ru.eaglebutt.funnotes.API.APIServiceConstructor;
 import ru.eaglebutt.funnotes.API.AllUsersResponseData;
-import ru.eaglebutt.funnotes.API.Event;
-import ru.eaglebutt.funnotes.API.User;
-import ru.eaglebutt.funnotes.API.UserService;
+import ru.eaglebutt.funnotes.DB.MainDB;
+import ru.eaglebutt.funnotes.Model.Event;
+import ru.eaglebutt.funnotes.Model.User;
+import ru.eaglebutt.funnotes.API.APIService;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //db = EventDB.get(getApplicationContext());
+        MainDB db = MainDB.get(getApplicationContext());
         //new myTask().execute();
         final TextView textView = findViewById(R.id.text_data);
         final Button addUserButton = findViewById(R.id.addUser);
@@ -52,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         event.setStartTime(System.currentTimeMillis());
         event.setEndTime(System.currentTimeMillis() + 500000);
 
-        UserService service = APIServiceConstructor.createService(UserService.class);
+        APIService service = APIServiceConstructor.createService(APIService.class);
 
         getAllButton.setOnClickListener(v -> {
             Call<AllUsersResponseData> getAllCall = service.getAllUserData(user.getEmail(), user.getPassword());
@@ -102,12 +104,23 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
                     if (response.body() != null){
-                        textView.setText(response.body().toString());
+                        new AsyncTask<Void, Void, User>() {
+                            @Override
+                            protected User doInBackground(Void... voids) {
+                                db.service().deleteUser();
+                                db.service().insert(response.body());
+                                return db.service().getUser().get(0);
+                            }
+
+                            @Override
+                            protected void onPostExecute(User user) {
+                                textView.setText(user.toString());
+                            }
+                        }.execute();
                     }
                     else {
                         textView.setText("");
                     }
-
                 }
 
                 @Override
@@ -183,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         getEventButton.setOnClickListener(v -> {
-            int id = Integer.parseInt(editText.getText().toString());
+            int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             Call<Event> getEventCall = service.getEvent(user.getEmail(), user.getPassword(), id);
             getEventCall.enqueue(new Callback<Event>() {
                 @Override
@@ -209,7 +222,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         deleteEventButton.setOnClickListener(v -> {
-            int id = Integer.parseInt(editText.getText().toString());
+            int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
+
             Call<Void> deleteEventCall = service.deleteEvent(user.getEmail(), user.getPassword(), id);
             deleteEventCall.enqueue(new Callback<Void>() {
                 @Override
@@ -230,7 +244,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         updateEventButton.setOnClickListener(v -> {
-            int id = Integer.parseInt(editText.getText().toString());
+            int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
+
             event.setTitle("Updated");
             event.setId(id);
             Call<Void> updateEventCall = service.putEvent(user.getEmail(), user.getPassword(), event);

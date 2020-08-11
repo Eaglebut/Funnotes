@@ -8,8 +8,10 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Query;
+import ru.eaglebutt.funnotes.Model.Event;
+import ru.eaglebutt.funnotes.Model.User;
 
-public interface UserService {
+public interface APIService {
     @GET(APIConfig.GET_ALL_USER_URL)
     Call<AllUsersResponseData> getAllUserData(@Query("email") String email, @Query("password") String password);
 

@@ -1,8 +1,12 @@
-package ru.eaglebutt.funnotes.API;
+package ru.eaglebutt.funnotes.Model;
+
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@Entity(tableName = "user")
 public class User {
 
     @SerializedName("password")
@@ -16,6 +20,7 @@ public class User {
     private String name;
     @SerializedName("id")
     @Expose
+    @PrimaryKey(autoGenerate = true)
     private long id;
     @SerializedName("email")
     @Expose
