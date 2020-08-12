@@ -1,12 +1,15 @@
 package ru.eaglebutt.funnotes.API;
 
 
+import androidx.room.Ignore;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
 import ru.eaglebutt.funnotes.Model.Event;
+import ru.eaglebutt.funnotes.Model.User;
 
 
 public class AllUsersResponseData {
@@ -86,5 +89,16 @@ public class AllUsersResponseData {
                 "\nname " + name +
                 "\nsurname " + surname +
                 "\nevents" + events;
+    }
+
+    @Ignore
+    public User getUser(){
+        User user = new User();
+        user.setId(id);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setName(name);
+        user.setSurname(surname);
+        return user;
     }
 }

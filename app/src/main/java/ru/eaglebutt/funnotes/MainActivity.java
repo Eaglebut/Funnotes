@@ -1,8 +1,11 @@
 package ru.eaglebutt.funnotes;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
 
+import android.app.Activity;
+import android.app.ActivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
@@ -20,6 +23,7 @@ import ru.eaglebutt.funnotes.DB.MainDB;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 import ru.eaglebutt.funnotes.API.APIService;
+import ru.eaglebutt.funnotes.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,9 +31,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Repository repository = Repository.getInstance(this);
+
+
+        ActivityMainBinding binding =
+                DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+        binding.setRepository(repository);
+
         MainDB db = MainDB.get(getApplicationContext());
         //new myTask().execute();
-        final TextView textView = findViewById(R.id.text_data);
         final Button addUserButton = findViewById(R.id.addUser);
         final Button getUserButton = findViewById(R.id.getUser);
         final Button updateUserButton = findViewById(R.id.updateUser);
@@ -56,7 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
         APIService service = APIServiceConstructor.createService(APIService.class);
 
-        getAllButton.setOnClickListener(v -> {
+
+        /*getAllButton.setOnClickListener(v -> {
             Call<AllUsersResponseData> getAllCall = service.getAllUserData(user.getEmail(), user.getPassword());
             getAllCall.enqueue(new Callback<AllUsersResponseData>() {
                 @Override
@@ -96,40 +108,12 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
                 }
             });
-        });
+        });*/
 
         getUserButton.setOnClickListener(v -> {
-            Call<User> userCall = service.getUser(user.getEmail(), user.getPassword());
-            userCall.enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(Call<User> call, Response<User> response) {
-                    if (response.body() != null){
-                        new AsyncTask<Void, Void, User>() {
-                            @Override
-                            protected User doInBackground(Void... voids) {
-                                db.service().deleteUser();
-                                db.service().insert(response.body());
-                                return db.service().getUser().get(0);
-                            }
-
-                            @Override
-                            protected void onPostExecute(User user) {
-                                textView.setText(user.toString());
-                            }
-                        }.execute();
-                    }
-                    else {
-                        textView.setText("");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<User> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+            repository.getUser(user.getEmail(), user.getPassword());
         });
-
+/*
         deleteUserButton.setOnClickListener(v -> {
             Call<Void> deleteUser = service.deleteUser(user.getEmail(),user.getPassword());
             deleteUser.enqueue(new Callback<Void>() {
@@ -268,12 +252,26 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-
-
-
-
-
+*/
     }
+
+    static class getUserTask extends AsyncTask<User, Void, User> {
+
+        TextView textView;
+
+
+
+        @Override
+        protected User doInBackground(User... users) {
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(User user) {
+            textView.setText(user.toString());
+        }
+    }
+
 /*
      class myTask extends AsyncTask<Void, Void, List<Event>>{
 

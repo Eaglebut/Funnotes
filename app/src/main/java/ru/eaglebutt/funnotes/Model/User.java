@@ -25,6 +25,17 @@ public class User {
     @SerializedName("email")
     @Expose
     private String email;
+    private boolean isSynchronized = false;
+
+
+    public boolean isSynchronized() {
+        return isSynchronized;
+    }
+
+    public void setSynchronized(boolean aSynchronized) {
+        isSynchronized = aSynchronized;
+    }
+
 
     public String getPassword() {
         return password;
@@ -32,6 +43,8 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+        this.isSynchronized = false;
+
     }
 
     public String getSurname() {
@@ -40,6 +53,7 @@ public class User {
 
     public void setSurname(String surname) {
         this.surname = surname;
+        this.isSynchronized = false;
     }
 
     public String getName() {
@@ -48,6 +62,7 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+        this.isSynchronized = false;
     }
 
     public long getId() {
@@ -56,6 +71,7 @@ public class User {
 
     public void setId(long id) {
         this.id = id;
+        this.isSynchronized = false;
     }
 
     public String getEmail() {
@@ -64,6 +80,7 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+        this.isSynchronized = false;
     }
 
     @Override
@@ -72,6 +89,7 @@ public class User {
                 "\nsurname='" + surname +
                 "\nname='" + name +
                 "\nid=" + id +
-                "\nemail " + email;
+                "\nemail " + email +
+                "\nisSynchronized " + isSynchronized;
     }
 }

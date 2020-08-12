@@ -26,12 +26,23 @@ public class Event {
     @Expose
     private String title;
 
+    private boolean isSynchronized;
+
+    public boolean isSynchronized() {
+        return isSynchronized;
+    }
+
+    public void setSynchronized(boolean aSynchronized) {
+        isSynchronized = aSynchronized;
+    }
+
     public long getStartTime() {
         return startTime;
     }
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
+        this.isSynchronized = false;
     }
 
     public long getEndTime() {
@@ -40,6 +51,7 @@ public class Event {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
+        this.isSynchronized = false;
     }
 
     public String getDescription() {
@@ -48,6 +60,7 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
+        this.isSynchronized = false;
     }
 
     public int getId() {
@@ -56,6 +69,7 @@ public class Event {
 
     public void setId(int id) {
         this.id = id;
+        this.isSynchronized = false;
     }
 
     public String getTitle() {
@@ -64,6 +78,7 @@ public class Event {
 
     public void setTitle(String title) {
         this.title = title;
+        this.isSynchronized = false;
     }
 
     @Override
@@ -72,7 +87,8 @@ public class Event {
                 "\ntitle " + title +
                 "\ndescription " + description +
                 "\nstart time " + startTime +
-                "\nend time " + endTime + "\n";
+                "\nend time " + endTime +
+                "\nisSynchronized " + isSynchronized;
     }
 
 }

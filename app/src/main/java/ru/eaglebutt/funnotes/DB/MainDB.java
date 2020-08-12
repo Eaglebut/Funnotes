@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Event.class, User.class}, version = 2)
+@Database(entities = {Event.class, User.class}, version = 3)
 public abstract class MainDB extends RoomDatabase {
 
     public abstract DBService service();
