@@ -3,6 +3,7 @@ package ru.eaglebutt.funnotes;
 import android.content.Context;
 
 import androidx.databinding.ObservableArrayList;
+import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ObservableList;
 
@@ -25,6 +26,15 @@ public class Repository {
     private ObservableField<User> observableUser = new ObservableField<>();
     private ObservableList<Event> observableEventList = new ObservableArrayList<>();
 
+    private ObservableBoolean isLoading = new ObservableBoolean(false);
+
+    public ObservableBoolean getIsLoading() {
+        return isLoading;
+    }
+
+    public void setIsLoading(ObservableBoolean isLoading) {
+        this.isLoading = isLoading;
+    }
 
     private Repository(Context context){
         db = MainDB.get(context);
@@ -39,11 +49,13 @@ public class Repository {
     }
 
     public void getUser(String email, String password)  {
+        isLoading.set(true);
         Call<User> userCall = apiService.getUser(email, password);
         userCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                if (response.code() == 200) {
+                isLoading.set(false);
+                if (response.isSuccessful()) {
                     if (response.body() != null) {
                         User user = response.body();
                         user.setSynchronized(true);
@@ -56,10 +68,58 @@ public class Repository {
             }
             @Override
             public void onFailure(Call<User> call, Throwable t) {
+                isLoading.set(false);
                 new GetUserFromDBThread(observableUser).start();
             }
         });
     }
+
+    public void addUser(User user){
+        isLoading.set(true);
+        observableUser.set(null);
+        Call<Void> putUser = apiService.putUser(user);
+        putUser.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+                if (response.isSuccessful()){
+                    user.setSynchronized(true);
+                    new InsertUserIntoDBThread(user).start();
+                    observableUser.set(user);
+                }
+                else {
+                    observableUser.set(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLoading.set(false);
+                observableUser.set(null);
+            }
+        });
+    }
+
+    public void deleteUser(String email, String password){
+        isLoading.set(true);
+        Call<Void> deleteUser = apiService.deleteUser(email, password);
+        deleteUser.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+                if (response.isSuccessful()){
+                    new DeleteUserFromDBThread().start();
+                    observableUser.set(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLoading.set(false);
+            }
+        });
+    }
+
 
     private static class GetUserFromDBThread extends Thread{
         private ObservableField<User> observableUser;
@@ -92,7 +152,12 @@ public class Repository {
         }
     }
 
-
+    private static class DeleteUserFromDBThread extends Thread{
+        @Override
+        public void run() {
+            db.service().deleteUser();
+        }
+    }
 
     public void setObservableUser(ObservableField<User> observableUser) {
         this.observableUser = observableUser;

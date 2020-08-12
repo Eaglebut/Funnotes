@@ -93,48 +93,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         });
-
+*/
         addUserButton.setOnClickListener(v -> {
             user.setName("Notchanged");
-            Call<Void> putUser = service.putUser(user);
-            putUser.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
-        });*/
+            repository.addUser(user);
+        });
 
         getUserButton.setOnClickListener(v -> {
             repository.getUser(user.getEmail(), user.getPassword());
         });
-/*
+
         deleteUserButton.setOnClickListener(v -> {
-            Call<Void> deleteUser = service.deleteUser(user.getEmail(),user.getPassword());
-            deleteUser.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.code() == 403){
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                    else {
-                        Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
-                    }
-
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+            repository.deleteUser(user.getEmail(), user.getPassword());
         });
-
+/*
         updateUserButton.setOnClickListener(v -> {
             user.setName("Changed");
             Call<Void> updateCall = service.updateUser(user.getEmail(),user.getPassword(), user);
