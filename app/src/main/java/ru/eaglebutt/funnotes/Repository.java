@@ -119,6 +119,30 @@ public class Repository {
             }
         });
     }
+    public void updateUser(String email, String password, User user){
+        user.setId(observableUser.get().getId());
+        isLoading.set(true);
+        user.setSynchronized(false);
+        observableUser.set(user);
+        new UpdateUserInDBThread(user).start();
+        Call<Void> updateUser = apiService.updateUser(email, password, user);
+        updateUser.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+                if (response.isSuccessful()){
+                    user.setSynchronized(true);
+                    new UpdateUserInDBThread(user);
+                    observableUser.set(user);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLoading.set(false);
+            }
+        });
+    }
 
 
     private static class GetUserFromDBThread extends Thread{
@@ -156,6 +180,19 @@ public class Repository {
         @Override
         public void run() {
             db.service().deleteUser();
+        }
+    }
+
+    private static class UpdateUserInDBThread extends Thread{
+        User user;
+
+        public UpdateUserInDBThread(User user) {
+            this.user = user;
+        }
+
+        @Override
+        public void run() {
+            db.service().update(user);
         }
     }
 

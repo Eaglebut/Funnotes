@@ -106,28 +106,12 @@ public class MainActivity extends AppCompatActivity {
         deleteUserButton.setOnClickListener(v -> {
             repository.deleteUser(user.getEmail(), user.getPassword());
         });
-/*
+
         updateUserButton.setOnClickListener(v -> {
             user.setName("Changed");
-            Call<Void> updateCall = service.updateUser(user.getEmail(),user.getPassword(), user);
-            updateCall.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.code() == 200){
-                        Toast.makeText(getApplicationContext(), "Отлично", Toast.LENGTH_LONG).show();
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+           repository.updateUser(user.getEmail(),user.getPassword(), user);
         });
-
+/*
         addEventButton.setOnClickListener(v -> {
             event.setTitle("Test");
             event.setId(0);
