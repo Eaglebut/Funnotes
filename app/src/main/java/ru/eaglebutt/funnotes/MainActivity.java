@@ -1,28 +1,19 @@
 package ru.eaglebutt.funnotes;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.databinding.DataBindingUtil;
-
-
-import android.app.Activity;
-import android.app.ActivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import ru.eaglebutt.funnotes.API.APIService;
 import ru.eaglebutt.funnotes.API.APIServiceConstructor;
-import ru.eaglebutt.funnotes.API.AllUsersResponseData;
 import ru.eaglebutt.funnotes.DB.MainDB;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
-import ru.eaglebutt.funnotes.API.APIService;
 import ru.eaglebutt.funnotes.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
@@ -68,32 +59,10 @@ public class MainActivity extends AppCompatActivity {
         APIService service = APIServiceConstructor.createService(APIService.class);
 
 
-        /*getAllButton.setOnClickListener(v -> {
-            Call<AllUsersResponseData> getAllCall = service.getAllUserData(user.getEmail(), user.getPassword());
-            getAllCall.enqueue(new Callback<AllUsersResponseData>() {
-                @Override
-                public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
-                    if (response.code() == 200){
-                        if (response.body() != null){
-                            textView.setText(response.body().toString());
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(), "Пустое тело", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    else if(response.code() == 403){
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-
-                }
-            });
+        getAllButton.setOnClickListener(v -> {
+           repository.getUserAndEvents(user.getEmail(), user.getPassword());
         });
-*/
+
         addUserButton.setOnClickListener(v -> {
             user.setName("Notchanged");
             repository.addUser(user);
@@ -111,30 +80,13 @@ public class MainActivity extends AppCompatActivity {
             user.setName("Changed");
            repository.updateUser(user.getEmail(),user.getPassword(), user);
         });
-/*
+
         addEventButton.setOnClickListener(v -> {
             event.setTitle("Test");
             event.setId(0);
-            Call<Void> putEventCall = service.putEvent(user.getEmail(), user.getPassword(), event);
-            putEventCall.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.code() == 200){
-                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
-
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+            repository.addEvent(user.getEmail(), user.getPassword(), event);
         });
-
+/*
         getEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             Call<Event> getEventCall = service.getEvent(user.getEmail(), user.getPassword(), id);

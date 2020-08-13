@@ -2,17 +2,15 @@ package ru.eaglebutt.funnotes.DB;
 
 
 import android.content.Context;
-import ru.eaglebutt.funnotes.Model.Event;
-import ru.eaglebutt.funnotes.Model.User;
 
-import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
-import androidx.room.migration.Migration;
-import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Event.class, User.class}, version = 3)
+import ru.eaglebutt.funnotes.Model.Event;
+import ru.eaglebutt.funnotes.Model.User;
+
+@Database(entities = {Event.class, User.class}, version = 4)
 public abstract class MainDB extends RoomDatabase {
 
     public abstract DBService service();

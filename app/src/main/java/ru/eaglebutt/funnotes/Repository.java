@@ -15,6 +15,7 @@ import retrofit2.Response;
 import ru.eaglebutt.funnotes.API.APIService;
 import ru.eaglebutt.funnotes.API.APIServiceConstructor;
 import ru.eaglebutt.funnotes.DB.MainDB;
+import ru.eaglebutt.funnotes.Model.AllUsersResponseData;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 
@@ -25,6 +26,21 @@ public class Repository {
 
     private ObservableField<User> observableUser = new ObservableField<>();
     private ObservableList<Event> observableEventList = new ObservableArrayList<>();
+    private ObservableField<String> observableString = new ObservableField<>();
+
+
+    public ObservableField<String> getObservableString() {
+        return observableString;
+    }
+
+    public void setObservableString(ObservableField<String> observableString) {
+        this.observableString = observableString;
+    }
+
+
+    public void setObservableUser(ObservableField<User> observableUser) {
+        this.observableUser = observableUser;
+    }
 
     private ObservableBoolean isLoading = new ObservableBoolean(false);
 
@@ -61,10 +77,10 @@ public class Repository {
                         user.setSynchronized(true);
                         new InsertUserIntoDBThread(user).start();
                         observableUser.set(user);
-                        return;
                     }
                 }
                 new GetUserFromDBThread(observableUser).start();
+                updateObservableString();
             }
             @Override
             public void onFailure(Call<User> call, Throwable t) {
@@ -72,6 +88,16 @@ public class Repository {
                 new GetUserFromDBThread(observableUser).start();
             }
         });
+    }
+
+    private void updateObservableString(){
+        StringBuilder builder = new StringBuilder();
+        builder.append(observableUser.get().toString())
+                .append("\n");
+        for (Event event: observableEventList) {
+            builder.append(event.toString());
+        }
+        observableString.set(builder.toString());
     }
 
     public void addUser(User user){
@@ -90,6 +116,7 @@ public class Repository {
                 else {
                     observableUser.set(null);
                 }
+                updateObservableString();
             }
 
             @Override
@@ -119,6 +146,8 @@ public class Repository {
             }
         });
     }
+
+
     public void updateUser(String email, String password, User user){
         user.setId(observableUser.get().getId());
         isLoading.set(true);
@@ -142,6 +171,133 @@ public class Repository {
                 isLoading.set(false);
             }
         });
+    }
+
+    public void getUserAndEvents(String email, String password){
+        isLoading.set(true);
+        Call<AllUsersResponseData> userCall = apiService.getAllUserData(email, password);
+        userCall.enqueue(new Callback<AllUsersResponseData>() {
+            @Override
+            public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
+                isLoading.set(false);
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        User user = response.body().getUser();
+                        user.setSynchronized(true);
+                        new InsertUserIntoDBThread(user).start();
+                        observableUser.set(user);
+                        observableEventList.clear();
+                        for (Event event: response.body().getEvents()) {
+                            event.setSynchronized(true);
+                            observableEventList.add(event);
+                        }
+                        new ReplaceEventListInDBThread(observableEventList).start();
+                        updateObservableString();
+                    }
+                }
+            }
+            @Override
+            public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
+                isLoading.set(false);
+            }
+        });
+    }
+
+    public void addEvent(String email, String password, Event event){
+        long currentTime = System.currentTimeMillis();
+        event.update();
+        event.setSynchronized(false);
+        isLoading.set(true);
+        observableEventList.add(event);
+        updateObservableString();
+        new AddEventInDBThread(event).start();
+        Call<Void> putEvent = apiService.putEvent(email, password, event);
+        putEvent.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+                if (response.isSuccessful()) {
+                    new GetAllEventsFromDBThread(observableEventList);
+                    Event updateEvent = findEventByUpdateTime(observableEventList, currentTime);
+                    observableEventList.remove(updateEvent);
+                    new DeleteEventFromDBThread(updateEvent);
+                    updateEvent.setSynchronized(true);
+                    new AddEventInDBThread(event);
+                    observableEventList.add(event);
+                    updateObservableString();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLoading.set(false);
+            }
+        });
+    }
+
+    private static class DeleteEventFromDBThread extends Thread{
+        private Event event;
+
+        private DeleteEventFromDBThread(Event event) {
+            this.event = event;
+        }
+
+        @Override
+        public void run() {
+            db.service().delete(event);
+        }
+    }
+
+    private Event findEventByUpdateTime(List<Event> events, long time){
+        for (Event event: events){
+            if (event.getLastUpdateTime() == time){
+                return event;
+            }
+        }
+        throw new NullPointerException();
+    }
+
+    private static class GetAllEventsFromDBThread extends Thread{
+        private ObservableList<Event> events;
+
+        private GetAllEventsFromDBThread(ObservableList<Event> events) {
+            this.events = events;
+        }
+
+        @Override
+        public void run() {
+            List<Event> eventList = db.service().getEvents();
+            events.clear();
+            events.addAll(eventList);
+        }
+    }
+
+    private static class AddEventInDBThread extends Thread{
+        private Event event;
+
+        private AddEventInDBThread(Event event) {
+            this.event = event;
+        }
+
+        @Override
+        public void run() {
+            db.service().insert(event);
+        }
+    }
+
+
+    private static class ReplaceEventListInDBThread extends Thread{
+        private List<Event> eventList;
+
+        private ReplaceEventListInDBThread(List<Event> eventList) {
+            this.eventList = eventList;
+        }
+
+        @Override
+        public void run() {
+            db.service().deleteAllEvents();
+            db.service().insert(eventList);
+        }
     }
 
 
@@ -196,13 +352,19 @@ public class Repository {
         }
     }
 
-    public void setObservableUser(ObservableField<User> observableUser) {
-        this.observableUser = observableUser;
+    public void setObservableUser(User observableUser) {
+        this.observableUser.set(observableUser);
     }
 
     public void setObservableEventList(ObservableList<Event> observableEventList) {
         this.observableEventList = observableEventList;
     }
+
+
+    public Event getEvent(int id){
+        return observableEventList.get(id);
+    }
+
 
     public ObservableField<User> getObservableUser() {
         return observableUser;

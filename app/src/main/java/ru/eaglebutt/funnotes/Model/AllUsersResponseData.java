@@ -1,4 +1,4 @@
-package ru.eaglebutt.funnotes.API;
+package ru.eaglebutt.funnotes.Model;
 
 
 import androidx.room.Ignore;
@@ -7,9 +7,6 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
-
-import ru.eaglebutt.funnotes.Model.Event;
-import ru.eaglebutt.funnotes.Model.User;
 
 
 public class AllUsersResponseData {

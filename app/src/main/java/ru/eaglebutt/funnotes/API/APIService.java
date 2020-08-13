@@ -8,6 +8,7 @@ import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Query;
+import ru.eaglebutt.funnotes.Model.AllUsersResponseData;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 

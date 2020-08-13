@@ -25,8 +25,8 @@ public class Event {
     @SerializedName("title")
     @Expose
     private String title;
-
-    private boolean isSynchronized;
+    private boolean isSynchronized = false;
+    private long lastUpdateTime;
 
     public boolean isSynchronized() {
         return isSynchronized;
@@ -91,4 +91,15 @@ public class Event {
                 "\nisSynchronized " + isSynchronized;
     }
 
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public void update(){
+        lastUpdateTime = System.currentTimeMillis();
+    }
 }

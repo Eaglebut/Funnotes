@@ -27,7 +27,10 @@ public interface DBService {
     Event findEventByID(int id);
 
     @Query("DELETE FROM events")
-    void deleteAll();
+    void deleteAllEvents();
+
+    @Query("select * from events where lastUpdateTime = :lastUpdated")
+    Event findEventByLastUpdated(long lastUpdated);
 
     @Insert
     void insert(Event event);
