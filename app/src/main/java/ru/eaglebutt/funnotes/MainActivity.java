@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         APIService service = APIServiceConstructor.createService(APIService.class);
 
+        repository.loadDataFromDB();
 
         getAllButton.setOnClickListener(v -> {
            repository.getUserAndEvents(user.getEmail(), user.getPassword());
@@ -86,64 +87,25 @@ public class MainActivity extends AppCompatActivity {
             event.setId(0);
             repository.addEvent(user.getEmail(), user.getPassword(), event);
         });
-/*
+
         getEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-            Call<Event> getEventCall = service.getEvent(user.getEmail(), user.getPassword(), id);
-            getEventCall.enqueue(new Callback<Event>() {
-                @Override
-                public void onResponse(Call<Event> call, Response<Event> response) {
-                    if (response.code() == 200){
-                        if (response.body() != null){
-                            textView.setText(response.body().toString());
-                        }
-                        else {
-                            Toast.makeText(getApplicationContext(), "Пустое тело", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Event> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+            repository.getEvent(user.getEmail(), user.getPassword(), id);
         });
-*/
+
         deleteEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             repository.deleteEvent(user.getEmail(), user.getPassword(), id);
         });
-/*
+
         updateEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-
             event.setTitle("Updated");
             event.setId(id);
-            Call<Void> updateEventCall = service.putEvent(user.getEmail(), user.getPassword(), event);
-            updateEventCall.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.code() == 200){
-                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
-
+            repository.updateEvent(user.getEmail(), user.getPassword(), event);
         });
 
-*/
+
     }
 
     static class getUserTask extends AsyncTask<User, Void, User> {
