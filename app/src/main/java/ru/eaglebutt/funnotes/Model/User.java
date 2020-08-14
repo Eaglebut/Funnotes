@@ -28,6 +28,7 @@ public class User {
     private boolean isSynchronized = false;
 
 
+
     public boolean isSynchronized() {
         return isSynchronized;
     }
@@ -85,11 +86,11 @@ public class User {
 
     @Override
     public String toString() {
-        return "\npassword " + password +
+        return "password " + password +
                 "\nsurname='" + surname +
                 "\nname='" + name +
                 "\nid=" + id +
                 "\nemail " + email +
-                "\nisSynchronized " + isSynchronized;
+                "\nisSynchronized " + isSynchronized + "\n";
     }
 }

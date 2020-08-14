@@ -6,34 +6,66 @@ import androidx.room.PrimaryKey;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.sql.Timestamp;
+
 @Entity(tableName = "events")
 public class Event {
 
-    @SerializedName("start_time")
+
+    @SerializedName(value = "start_time")
     @Expose
     private long startTime;
-    @SerializedName("end_time")
+    @SerializedName(value = "end_time")
     @Expose
     private long endTime;
-    @SerializedName("description")
+    @SerializedName(value = "description")
     @Expose
     private String description;
-    @SerializedName("id")
+    @SerializedName(value = "id")
     @Expose
-    @PrimaryKey(autoGenerate = true)
-    private int id;
-    @SerializedName("title")
+    private int serverId;
+    @SerializedName(value = "title")
     @Expose
     private String title;
-    private boolean isSynchronized = false;
-    private long lastUpdateTime;
 
-    public boolean isSynchronized() {
-        return isSynchronized;
+    @PrimaryKey(autoGenerate = true)
+    private int localId;
+    private long lastUpdateTime;
+    private int status;
+    private long created;
+
+
+
+    public static class STATUSES{
+        public static int SYNCHRONIZED = 0;
+        public static int NEW = 1;
+        public static int UPDATED = 2;
+        public static int DELETED = 3;
     }
 
-    public void setSynchronized(boolean aSynchronized) {
-        isSynchronized = aSynchronized;
+    public Event(){
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+    public long getCreated() {
+        return created;
+    }
+    public int getServerId() {
+        return serverId;
+    }
+
+    public void setServerId(int serverId) {
+        this.serverId = serverId;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     public long getStartTime() {
@@ -42,7 +74,6 @@ public class Event {
 
     public void setStartTime(long startTime) {
         this.startTime = startTime;
-        this.isSynchronized = false;
     }
 
     public long getEndTime() {
@@ -51,7 +82,6 @@ public class Event {
 
     public void setEndTime(long endTime) {
         this.endTime = endTime;
-        this.isSynchronized = false;
     }
 
     public String getDescription() {
@@ -60,16 +90,14 @@ public class Event {
 
     public void setDescription(String description) {
         this.description = description;
-        this.isSynchronized = false;
     }
 
-    public int getId() {
-        return id;
+    public int getLocalId() {
+        return localId;
     }
 
-    public void setId(int id) {
-        this.id = id;
-        this.isSynchronized = false;
+    public void setLocalId(int localId) {
+        this.localId = localId;
     }
 
     public String getTitle() {
@@ -78,17 +106,20 @@ public class Event {
 
     public void setTitle(String title) {
         this.title = title;
-        this.isSynchronized = false;
     }
 
     @Override
     public String toString() {
-        return "\nid " + id +
+        return "local id " + localId +
+                "\nserver id " + serverId +
                 "\ntitle " + title +
                 "\ndescription " + description +
-                "\nstart time " + startTime +
-                "\nend time " + endTime +
-                "\nisSynchronized " + isSynchronized;
+                "\nstart time " + new Timestamp(startTime).toString() +
+                "\nend time " + new Timestamp(endTime).toString()  +
+                "\nstatus " + status +
+                "\ncreated "+ new Timestamp(created).toString() +
+                "\nupdated " + new Timestamp(lastUpdateTime) +
+                "\n";
     }
 
     public long getLastUpdateTime() {

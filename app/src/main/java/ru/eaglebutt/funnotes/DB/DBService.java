@@ -23,14 +23,17 @@ public interface DBService {
     @Query("SELECT * from events")
     List<Event> getEvents();
 
-    @Query("SELECT * from events where id = :id")
-    Event findEventByID(int id);
+    @Query("SELECT * from events where localId = :id")
+    Event findEventByLocalId(int id);
 
     @Query("DELETE FROM events")
     void deleteAllEvents();
 
     @Query("select * from events where lastUpdateTime = :lastUpdated")
     Event findEventByLastUpdated(long lastUpdated);
+
+    @Query("select * from events where serverId = :serverId")
+    Event findEventByServerId(int serverId);
 
     @Insert
     void insert(Event event);

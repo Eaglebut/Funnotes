@@ -1,17 +1,12 @@
 package ru.eaglebutt.funnotes;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
-import ru.eaglebutt.funnotes.API.APIService;
-import ru.eaglebutt.funnotes.API.APIServiceConstructor;
-import ru.eaglebutt.funnotes.DB.MainDB;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 import ru.eaglebutt.funnotes.databinding.ActivityMainBinding;
@@ -30,8 +25,6 @@ public class MainActivity extends AppCompatActivity {
 
         binding.setRepository(repository);
 
-        MainDB db = MainDB.get(getApplicationContext());
-        //new myTask().execute();
         final Button addUserButton = findViewById(R.id.addUser);
         final Button getUserButton = findViewById(R.id.getUser);
         final Button updateUserButton = findViewById(R.id.updateUser);
@@ -56,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
         event.setStartTime(System.currentTimeMillis());
         event.setEndTime(System.currentTimeMillis() + 500000);
 
-        APIService service = APIServiceConstructor.createService(APIService.class);
 
         repository.loadDataFromDB();
 
@@ -69,9 +61,6 @@ public class MainActivity extends AppCompatActivity {
             repository.addUser(user);
         });
 
-        getUserButton.setOnClickListener(v -> {
-            repository.getUser(user.getEmail(), user.getPassword());
-        });
 
         deleteUserButton.setOnClickListener(v -> {
             repository.deleteUser(user.getEmail(), user.getPassword());
@@ -84,14 +73,10 @@ public class MainActivity extends AppCompatActivity {
 
         addEventButton.setOnClickListener(v -> {
             event.setTitle("Test");
-            event.setId(0);
+            event.setLocalId(0);
             repository.addEvent(user.getEmail(), user.getPassword(), event);
         });
 
-        getEventButton.setOnClickListener(v -> {
-            int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-            repository.getEvent(user.getEmail(), user.getPassword(), id);
-        });
 
         deleteEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
@@ -101,50 +86,8 @@ public class MainActivity extends AppCompatActivity {
         updateEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             event.setTitle("Updated");
-            event.setId(id);
+            event.setLocalId(id);
             repository.updateEvent(user.getEmail(), user.getPassword(), event);
         });
-
-
     }
-
-    static class getUserTask extends AsyncTask<User, Void, User> {
-
-        TextView textView;
-
-
-
-        @Override
-        protected User doInBackground(User... users) {
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(User user) {
-            textView.setText(user.toString());
-        }
-    }
-
-/*
-     class myTask extends AsyncTask<Void, Void, List<Event>>{
-
-        @Override
-        protected List<Event> doInBackground(Void... voids) {
-            EventList eventList = db.eventList();
-            return eventList.getEvents();
-        }
-
-        @Override
-        protected void onPostExecute(List<Event> events) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1);
-            for (Event event: events){
-                adapter.add(event.toString());
-            }
-            //ListView listView = findViewById(R.id.list_view);
-            //listView.setAdapter(adapter);
-        }
-    }
-
- */
 }

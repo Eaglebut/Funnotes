@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 
-@Database(entities = {Event.class, User.class}, version = 4)
+@Database(entities = {Event.class, User.class}, version = 12)
 public abstract class MainDB extends RoomDatabase {
 
     public abstract DBService service();
