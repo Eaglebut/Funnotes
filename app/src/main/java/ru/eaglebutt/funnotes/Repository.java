@@ -204,7 +204,6 @@ public class Repository {
     }
 
     public void addEvent(String email, String password, Event event){
-        long currentTime = System.currentTimeMillis();
         event.update();
         event.setSynchronized(false);
         isLoading.set(true);
@@ -215,17 +214,53 @@ public class Repository {
         putEvent.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        isLoading.set(false);
+                        if (response.isSuccessful()) {
+                            new GetAllEventsFromDBThread(observableEventList).start();
+
+                            Event updateEvent = findEventByUpdateTime(observableEventList, event.getLastUpdateTime());
+                            observableEventList.remove(updateEvent);
+                            new DeleteEventFromDBThread(updateEvent);
+                            updateEvent.setSynchronized(true);
+                            new AddEventInDBThread(event);
+                            observableEventList.add(event);
+                            updateObservableString();
+                        }
+                    }
+                }.start();
+            }
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
                 isLoading.set(false);
-                if (response.isSuccessful()) {
-                    new GetAllEventsFromDBThread(observableEventList);
-                    Event updateEvent = findEventByUpdateTime(observableEventList, currentTime);
-                    observableEventList.remove(updateEvent);
-                    new DeleteEventFromDBThread(updateEvent);
-                    updateEvent.setSynchronized(true);
-                    new AddEventInDBThread(event);
-                    observableEventList.add(event);
-                    updateObservableString();
-                }
+            }
+        });
+    }
+
+    public void deleteEvent(String email, String password, int id){
+        if (id == 0){
+            return;
+        }
+
+        isLoading.set(true);
+        Call<Void> deleteEvent = apiService.deleteEvent(email, password, id);
+
+        deleteEvent.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+                new Thread(){
+                    @Override
+                    public void run() {
+                        Event event = db.service().findEventByID(id);
+                        db.service().delete(event);
+                        observableEventList.clear();
+                        observableEventList.addAll(db.service().getEvents());
+                        updateObservableString();
+                    }
+                }.start();
             }
 
             @Override
@@ -233,6 +268,7 @@ public class Repository {
                 isLoading.set(false);
             }
         });
+
     }
 
     private static class DeleteEventFromDBThread extends Thread{
@@ -247,6 +283,8 @@ public class Repository {
             db.service().delete(event);
         }
     }
+
+
 
     private Event findEventByUpdateTime(List<Event> events, long time){
         for (Event event: events){

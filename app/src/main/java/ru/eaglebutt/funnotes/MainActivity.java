@@ -112,29 +112,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         });
-
+*/
         deleteEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-
-            Call<Void> deleteEventCall = service.deleteEvent(user.getEmail(), user.getPassword(), id);
-            deleteEventCall.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.code() == 200){
-                        Toast.makeText(getApplicationContext(), "Успешно", Toast.LENGTH_LONG).show();
-                    }
-                    else{
-                        Toast.makeText(getApplicationContext(), "Запрещено", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(), "Ошибка", Toast.LENGTH_LONG).show();
-                }
-            });
+            repository.deleteEvent(user.getEmail(), user.getPassword(), id);
         });
-
+/*
         updateEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
 
