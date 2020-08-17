@@ -1,6 +1,8 @@
 package ru.eaglebutt.funnotes.Model;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import com.google.gson.annotations.Expose;
@@ -35,23 +37,37 @@ public class Event {
     private long created;
 
 
-
-    public static class STATUSES{
+    public static class STATUSES {
         public static int SYNCHRONIZED = 0;
         public static int NEW = 1;
         public static int UPDATED = 2;
         public static int DELETED = 3;
     }
 
-    public Event(){
+    public Event() {
+    }
+
+    @Ignore
+    public Event(Event event) {
+        this.startTime = event.startTime;
+        this.endTime = event.endTime;
+        this.description = event.description;
+        this.serverId = event.serverId;
+        this.title = event.title;
+        this.localId = event.localId;
+        this.lastUpdateTime = event.lastUpdateTime;
+        this.status = event.status;
+        this.created = event.created;
     }
 
     public void setCreated(long created) {
         this.created = created;
     }
+
     public long getCreated() {
         return created;
     }
+
     public int getServerId() {
         return serverId;
     }
@@ -108,6 +124,7 @@ public class Event {
         this.title = title;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "local id " + localId +

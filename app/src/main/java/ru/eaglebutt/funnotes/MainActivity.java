@@ -72,20 +72,22 @@ public class MainActivity extends AppCompatActivity {
         addEventButton.setOnClickListener(v -> {
             event.setTitle("Test");
             event.setLocalId(0);
-            repository.addEvent(user.getEmail(), user.getPassword(), event);
+            event.setStatus(Event.STATUSES.SYNCHRONIZED);
+            event.setServerId(0);
+            repository.addEventInThread(user.getEmail(), user.getPassword(), event);
         });
 
 
         deleteEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-            repository.deleteEvent(user.getEmail(), user.getPassword(), id);
+            repository.deleteEventInThread(user.getEmail(), user.getPassword(), id);
         });
 
         updateEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             event.setTitle("Updated");
             event.setLocalId(id);
-            repository.updateEvent(user.getEmail(), user.getPassword(), event);
+            repository.updateEventInThread(user.getEmail(), user.getPassword(), event);
         });
     }
 }

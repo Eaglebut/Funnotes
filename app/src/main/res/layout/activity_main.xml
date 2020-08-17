@@ -98,14 +98,21 @@
                 android:layout_height="75dp"
                 android:text="get all"
                 android:id="@+id/getAll"
-                android:layout_weight="3"
-                />
+                android:layout_weight="1" />
+
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:id="@+id/edit_text"
-                />
+                android:id="@+id/edit_text" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@{String.valueOf(repository.isLoading) + '\n' + String.valueOf(repository.isSynchronized)}"
+                android:textSize="22sp"
+                tools:text="TEST" />
 
 
         </LinearLayout>

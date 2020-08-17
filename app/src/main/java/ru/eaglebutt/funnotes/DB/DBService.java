@@ -35,6 +35,9 @@ public interface DBService {
     @Query("select * from events where serverId = :serverId")
     Event findEventByServerId(int serverId);
 
+    @Query("select * from events where not status = 0")
+    List<Event> getNotUpdatedEvents();
+
     @Insert
     void insert(Event event);
 
