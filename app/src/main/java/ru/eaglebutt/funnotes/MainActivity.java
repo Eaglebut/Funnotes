@@ -26,11 +26,9 @@ public class MainActivity extends AppCompatActivity {
         binding.setRepository(repository);
 
         final Button addUserButton = findViewById(R.id.addUser);
-        final Button getUserButton = findViewById(R.id.getUser);
         final Button updateUserButton = findViewById(R.id.updateUser);
         final Button deleteUserButton = findViewById(R.id.deleteUser);
         final Button addEventButton = findViewById(R.id.addEvent);
-        final Button getEventButton = findViewById(R.id.getEvent);
         final Button updateEventButton = findViewById(R.id.updateEvent);
         final Button deleteEventButton = findViewById(R.id.deleteEvent);
         final Button getAllButton = findViewById(R.id.getAll);
@@ -49,8 +47,8 @@ public class MainActivity extends AppCompatActivity {
         event.setStartTime(System.currentTimeMillis());
         event.setEndTime(System.currentTimeMillis() + 500000);
 
-
-        repository.loadDataFromDB();
+        repository.getUserFromDB();
+        repository.getUserAndEvents(user.getEmail(), user.getPassword());
 
         getAllButton.setOnClickListener(v -> {
            repository.getUserAndEvents(user.getEmail(), user.getPassword());

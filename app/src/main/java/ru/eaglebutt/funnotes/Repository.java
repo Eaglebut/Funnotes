@@ -70,145 +70,165 @@ public class Repository {
         observableString.set(builder.toString());
     }
 
-    public synchronized void addUser(User user){
-        synchronizeWithServer();
-        if (isLoading.get()){return;}
-        isLoading.set(true);
-        observableUser.set(null);
-        updateObservableString();
-        Call<Void> putUser = apiService.putUser(user);
-        putUser.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                isLoading.set(false);
-                if (response.isSuccessful()){
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            user.setSynchronized(true);
-                            db.service().deleteUser();
-                            db.service().insert(user);
-                            observableUser.set(user);
-                            updateObservableString();
-                        }
-                    }.start();
-                }
-            }
 
+    public synchronized void getUserFromDB(){
+        new Thread(){
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                isLoading.set(false);
+            public void run() {
+                observableUser.set(db.service().getUser().get(0));
             }
-        });
+        }.start();
+    }
+
+    public synchronized void addUser(User user){
+        new Thread(new RepositoryThread() {
+            @Override
+            void runFunction() {
+                db.service().deleteUser();
+                db.service().deleteAllEvents();
+                observableUser.set(null);
+                observableEventList.clear();
+                Call<Void> putUser = apiService.putUser(user);
+                putUser.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        isLoading.set(false);
+                        if (response.isSuccessful()){
+                            new Thread(){
+                                @Override
+                                public void run() {
+                                    getUserAndEvents(user.getEmail(), user.getPassword());
+                                }
+                            }.start();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        isLoading.set(false);
+                    }
+                });
+            }
+        }).start();
     }
 
     public synchronized void deleteUser(String email, String password){
-        synchronizeWithServer();
-        if (isLoading.get()){return;}
-        isLoading.set(true);
-        Call<Void> deleteUser = apiService.deleteUser(email, password);
-        deleteUser.enqueue(new Callback<Void>() {
+        new Thread(new RepositoryThread() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                isLoading.set(false);
-                if (response.isSuccessful()){
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            db.service().deleteUser();
-                            db.service().deleteAllEvents();
-                            observableUser.set(null);
-                            observableEventList.clear();
-                            updateObservableString();
+            void runFunction() {
+                Call<Void> deleteUser = apiService.deleteUser(email, password);
+                deleteUser.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        isLoading.set(false);
+                        if (response.isSuccessful()){
+                            new Thread(){
+                                @Override
+                                public void run() {
+                                    db.service().deleteUser();
+                                    observableUser.set(null);
+                                    observableEventList.clear();
+                                    observableString.set(null);
+                                }
+                            }.start();
                         }
-                    }.start();
-                }
-            }
+                    }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                isLoading.set(false);
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        isLoading.set(false);
+                    }
+                });
             }
-        });
+        }).start();
     }
 
 
     public synchronized void updateUser(String email, String password, User user){
-        synchronizeWithServer();
-        if (isLoading.get()){return;}
-        isLoading.set(true);
-        Call<Void> updateUser = apiService.updateUser(email, password, user);
-        updateUser.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                isLoading.set(false);
-                if (response.isSuccessful()){
-                    getUserAndEvents(email, password);
-                }
-            }
 
+        new Thread(new RepositoryThread() {
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                isLoading.set(false);
+            void runFunction() {
+                Call<Void> updateUser = apiService.updateUser(email, password, user);
+                updateUser.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        isLoading.set(false);
+                        if (response.isSuccessful()){
+                            getUserAndEvents(email, password);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        isLoading.set(false);
+                    }
+                });
             }
-        });
+        }).start();
     }
+
 
     public synchronized void getUserAndEvents(String email, String password){
-        synchronizeWithServer();
-        if (isLoading.get()){return;}
-        isLoading.set(true);
-        Call<AllUsersResponseData> userCall = apiService.getAllUserData(email, password);
-        userCall.enqueue(new Callback<AllUsersResponseData>() {
+        new Thread(new RepositoryThread() {
             @Override
-            public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
-                isLoading.set(false);
-                if (response.isSuccessful()){
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            User user =  response.body().getUser();
-                            db.service().deleteUser();
-                            db.service().deleteAllEvents();
-                            user.setSynchronized(true);
-                            db.service().insert(user);
-                            observableEventList.clear();
-                            for (Event event: response.body().getEvents()){
-                                event.setStatus(Event.STATUSES.SYNCHRONIZED);
-                                event.update();
-                                observableEventList.add(event);
+            void runFunction() {
+                Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(email, password);
+
+                responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
+                    @Override
+                    public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
+                        isLoading.set(false);
+                        new Thread(){
+                            @Override
+                            public void run() {
+                                if (!response.isSuccessful()){
+                                    return;
+                                }
+                                if(response.body() == null){
+                                    return;
+                                }
+                                db.service().deleteUser();
+                                db.service().deleteAllEvents();
+                                User user = response.body().getUser();
+                                user.setSynchronized(true);
+                                List<Event> eventList = response.body().getEvents();
+                                for (Event event: eventList){
+                                    event.setStatus(Event.STATUSES.UPDATED);
+                                    event.update();
+                                }
+                                db.service().insert(user);
+                                db.service().insert(eventList);
+                                loadDataFromDB();
                             }
-                            db.service().insert(observableEventList);
-                            observableEventList.clear();
-                            observableEventList.addAll(db.service().getEvents());
-                            updateObservableString();
-                        }
-                    }.start();
-                }
+                        }.start();
+                    }
+
+                    @Override
+                    public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
+                        isLoading.set(false);
+                        new Thread(){
+                            @Override
+                            public void run() {
+
+                            }
+                        }.start();
+                    }
+                });
             }
-            @Override
-            public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
-                isLoading.set(false);
-            }
-        });
+        }).start();
     }
 
+
     public synchronized void addEvent(String email, String password, Event event){
-        new Thread(){
+        new Thread(new RepositoryThread() {
             @Override
-            public void run() {
-                synchronizeWithServer();
-                if (isLoading.get()) {
-                    return;
-                }
-                isLoading.set(true);
+            void runFunction() {
                 event.update();
                 event.setCreated(System.currentTimeMillis());
                 event.setStatus(Event.STATUSES.NEW);
                 db.service().insert(event);
-                observableEventList.clear();
-                observableEventList.addAll(db.service().getEvents());
-                updateObservableString();
+                loadDataFromDB();
                 Call<Void> putEvent = apiService.putEvent(email, password, event);
                 putEvent.enqueue(new Callback<Void>() {
                     @Override
@@ -227,88 +247,67 @@ public class Repository {
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
                         isLoading.set(false);
+                        new Thread(() -> {
+                        }).start();
                     }
                 });
             }
-        }.start();
+        }).start();
     }
 
     public synchronized void deleteEvent(String email, String password, int id){
-        synchronizeWithServer();
-        if (isLoading.get()){return;}
-        if (id == 0){
-            return;
-        }
-        isLoading.set(true);
-        Event event = null;
-        for (int i = 0; i < observableEventList.size(); i++){
-            if(observableEventList.get(i).getLocalId() == id){
-                event = observableEventList.get(i);
-                if (event.getStatus() == Event.STATUSES.NEW){
-                    Event finalEvent = event;
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            db.service().delete(finalEvent);
-                        }
-                    }.start();
-                    observableEventList.remove(event);
-                    updateObservableString();
+        new Thread(new RepositoryThread()   {
+            @Override
+            void runFunction() {
+                if (id == 0){
+                    return;
+                }
+                Event event = db.service().findEventByLocalId(id);
+
+                if (event == null){
                     isLoading.set(false);
                     return;
                 }
-                else {
+
+                if (event.getStatus() == Event.STATUSES.NEW){
+                    db.service().delete(event);
+                    isLoading.set(false);
+                    return;
+                }
+                else{
                     event.setStatus(Event.STATUSES.DELETED);
                     event.update();
-                    Event finalEvent = event;
-                    new Thread(){
-                        @Override
-                        public void run() {
-                            db.service().update(finalEvent);
-                        }
-                    }.start();
-                    observableEventList.set(i, event);
-                    updateObservableString();
+                    db.service().update(event);
                 }
-            }
-        }
-        if (event == null){
-            isLoading.set(false);
-            return;
-        }
-        Call<Void> deleteEvent = apiService.deleteEvent(email, password, event.getServerId());
-        deleteEvent.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                isLoading.set(false);
-                getUserAndEvents(email, password);
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                isLoading.set(false);
+                Call<Void> deleteEvent = apiService.deleteEvent(email, password, event.getServerId());
+                deleteEvent.enqueue(new Callback<Void>() {
+                    @Override
+                    public void onResponse(Call<Void> call, Response<Void> response) {
+                        isLoading.set(false);
+                        getUserAndEvents(email, password);
+                    }
+
+                    @Override
+                    public void onFailure(Call<Void> call, Throwable t) {
+                        isLoading.set(false);
+                    }
+                });
             }
-        });
+        }).start();
+
     }
 
 
     public synchronized void updateEvent(String email, String password, Event event){
-        synchronizeWithServer();
-        new Thread(){
+        new Thread(new RepositoryThread() {
             @Override
-            public void run() {
-                if (isLoading.get()){return;}
-                isLoading.set(true);
-                Event bufferEvent = db.service().findEventByLocalId(event.getLocalId());
-                if (bufferEvent == null){
-                    isLoading.set(false);
-                    return;
-                }
-                event.setServerId(bufferEvent.getServerId());
+            void runFunction() {
+                event.setServerId(db.service().findEventByLocalId(event.getLocalId()).getServerId());
                 event.setStatus(Event.STATUSES.UPDATED);
                 event.update();
                 db.service().update(event);
-                updateObservableString();
+                loadDataFromDB();
                 Call<Void> updateEventCall = apiService.putEvent(email, password, event);
                 updateEventCall.enqueue(new Callback<Void>() {
                     @Override
@@ -325,56 +324,38 @@ public class Repository {
                     }
                 });
             }
-        }.start();
+        }).start();
     }
 
     public synchronized void synchronizeWithServer(){
         if (isLoading.get()){return;}
-        new Thread(){
-            @Override
-            public void run() {
-                loadDataFromDB();
-                if(observableUser.get() == null)
-                    return;
-                if (!observableUser.get().isSynchronized()){
-                    updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(),observableUser.get());
-                }
-                Event buffer;
-                for (Event event: observableEventList){
-                    if (event.getStatus() == Event.STATUSES.NEW){
-                        buffer = event;
-                        deleteEvent(observableUser.get().getEmail(),observableUser.get().getPassword(), event.getLocalId());
-                        addEvent(observableUser.get().getEmail(),observableUser.get().getPassword(), buffer);
-                    }
-                    else if(event.getStatus() == Event.STATUSES.UPDATED){
-                        updateEvent(observableUser.get().getEmail(),observableUser.get().getPassword(), event);
-                    }
-                    else if (event.getStatus() == Event.STATUSES.DELETED){
-                        deleteEvent(observableUser.get().getEmail(),observableUser.get().getPassword(), event.getLocalId());
-                    }
-                }
+        loadDataFromDB();
+        if(observableUser.get() == null)
+            return;
+        if (!observableUser.get().isSynchronized()) {
+            updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), observableUser.get());
+        }
+        for (Event event: observableEventList) {
+            if (event.getStatus() == Event.STATUSES.NEW) {
+                deleteEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event.getLocalId());
+                addEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
+            } else if (event.getStatus() == Event.STATUSES.UPDATED) {
+                updateEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
+            } else if (event.getStatus() == Event.STATUSES.DELETED) {
+                deleteEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event.getLocalId());
             }
-        }.start();
+        }
     }
 
     public synchronized void loadDataFromDB(){
-        new Thread(){
-            @Override
-            public void run() {
-                List<User> user = db.service().getUser();
-                if (user == null || user.isEmpty()){
-                    return;
-                }
-                observableUser.set(user.get(0));
-                observableEventList.clear();
-                observableEventList.addAll(db.service().getEvents());
-                updateObservableString();
-            }
-        }.start();
-    }
-
-    public Event getEvent(int id){
-        return observableEventList.get(id);
+        List<User> user = db.service().getUser();
+        if (user == null || user.isEmpty()){
+            return;
+        }
+        observableUser.set(user.get(0));
+        observableEventList.clear();
+        observableEventList.addAll(db.service().getEvents());
+        updateObservableString();
     }
 
 
@@ -385,4 +366,21 @@ public class Repository {
     public ObservableList<Event> getObservableEventList() {
         return observableEventList;
     }
+
+    abstract class RepositoryThread implements Runnable{
+
+        abstract void runFunction();
+
+        @Override
+        public void run() {
+            if (isLoading.get())
+                return;
+            isLoading.set(true);
+            synchronizeWithServer();
+            loadDataFromDB();
+            updateObservableString();
+            runFunction();
+        }
+    }
+
 }

@@ -41,12 +41,7 @@
                 android:text="add"
                 android:id="@+id/addUser"
                 android:layout_weight="1"/>
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="get"
-                android:id="@+id/getUser"
-                android:layout_weight="1"/>
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
@@ -78,12 +73,7 @@
                 android:text="add"
                 android:id="@+id/addEvent"
                 android:layout_weight="1"/>
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="get"
-                android:id="@+id/getEvent"
-                android:layout_weight="1"/>
+
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="75dp"
