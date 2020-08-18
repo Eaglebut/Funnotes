@@ -14,12 +14,12 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import ru.eaglebutt.funnotes.API.APIService;
-import ru.eaglebutt.funnotes.API.APIServiceConstructor;
-import ru.eaglebutt.funnotes.DB.MainDB;
-import ru.eaglebutt.funnotes.Model.AllUsersResponseData;
-import ru.eaglebutt.funnotes.Model.Event;
-import ru.eaglebutt.funnotes.Model.User;
+import ru.eaglebutt.funnotes.api.APIService;
+import ru.eaglebutt.funnotes.api.APIServiceConstructor;
+import ru.eaglebutt.funnotes.db.MainDB;
+import ru.eaglebutt.funnotes.model.AllUsersResponseData;
+import ru.eaglebutt.funnotes.model.Event;
+import ru.eaglebutt.funnotes.model.User;
 
 public class DataManager {
     private MainDB db;

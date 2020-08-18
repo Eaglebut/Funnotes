@@ -1,4 +1,4 @@
-package ru.eaglebutt.funnotes.Model;
+package ru.eaglebutt.funnotes.model;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;

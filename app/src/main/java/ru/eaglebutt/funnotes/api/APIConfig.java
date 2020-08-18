@@ -1,4 +1,4 @@
-package ru.eaglebutt.funnotes.API;
+package ru.eaglebutt.funnotes.api;
 
 public class APIConfig {
     //public static final String HOST_URL = "http://195.133.196.6:8080/FunnotesJServer/";

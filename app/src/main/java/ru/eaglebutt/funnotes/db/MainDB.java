@@ -1,4 +1,4 @@
-package ru.eaglebutt.funnotes.DB;
+package ru.eaglebutt.funnotes.db;
 
 
 import android.content.Context;
@@ -7,8 +7,8 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import ru.eaglebutt.funnotes.Model.Event;
-import ru.eaglebutt.funnotes.Model.User;
+import ru.eaglebutt.funnotes.model.Event;
+import ru.eaglebutt.funnotes.model.User;
 
 @Database(entities = {Event.class, User.class}, version = 12)
 public abstract class MainDB extends RoomDatabase {

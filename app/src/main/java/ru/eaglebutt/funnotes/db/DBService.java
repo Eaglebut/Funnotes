@@ -1,4 +1,4 @@
-package ru.eaglebutt.funnotes.DB;
+package ru.eaglebutt.funnotes.db;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -8,8 +8,8 @@ import androidx.room.Update;
 
 import java.util.List;
 
-import ru.eaglebutt.funnotes.Model.Event;
-import ru.eaglebutt.funnotes.Model.User;
+import ru.eaglebutt.funnotes.model.Event;
+import ru.eaglebutt.funnotes.model.User;
 
 @Dao
 public interface DBService {

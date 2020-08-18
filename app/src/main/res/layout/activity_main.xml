@@ -1,130 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".MainActivity">
 
-    <data>
-        <variable
-            name="dataManager"
-            type="ru.eaglebutt.funnotes.DataManager" />
-    </data>
-
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:refreshing="@{dataManager.isLoading}"
-        >
+        android:layout_height="match_parent">
 
 
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".MainActivity"
-        android:orientation="vertical">
-
-
-        <TextView
+        <fragment
+            android:id="@+id/nav_host_fragment"
+            android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="user"
-            android:textSize="20sp"
-            />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="match_parent"
+            app:defaultNavHost="true"
+            app:navGraph="@navigation/nav_graph" />
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="add"
-                android:id="@+id/addUser"
-                android:layout_weight="1"/>
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="delete"
-                android:id="@+id/deleteUser"
-                android:layout_weight="1"/>
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="update"
-                android:id="@+id/updateUser"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="event"
-            android:textSize="20sp"/>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="add"
-                android:id="@+id/addEvent"
-                android:layout_weight="1"/>
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="delete"
-                android:id="@+id/deleteEvent"
-                android:layout_weight="1"/>
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="update"
-                android:id="@+id/updateEvent"
-                android:layout_weight="1"/>
-
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="75dp"
-                android:text="get all"
-                android:id="@+id/getAll"
-                android:layout_weight="1" />
-
-            <EditText
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:id="@+id/edit_text" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:text="@{String.valueOf(dataManager.isLoading) + '\n' + String.valueOf(dataManager.isSynchronized)}"
-                android:textSize="22sp"
-                tools:text="TEST" />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/text_data"
-            android:text="@{dataManager.observableString.toString()}"
-            tools:textSize="24sp"
-            tools:text="test"
-            />
-    </LinearLayout>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>
