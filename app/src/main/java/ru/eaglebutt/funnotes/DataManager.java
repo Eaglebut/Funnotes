@@ -9,7 +9,6 @@ import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
 import androidx.databinding.ObservableList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -22,16 +21,15 @@ import ru.eaglebutt.funnotes.Model.AllUsersResponseData;
 import ru.eaglebutt.funnotes.Model.Event;
 import ru.eaglebutt.funnotes.Model.User;
 
-public class Repository {
+public class DataManager {
     private MainDB db;
     private APIService apiService;
-    private static Repository INSTANCE = null;
+    private static DataManager INSTANCE = null;
     private ObservableField<User> observableUser = new ObservableField<>();
     private ObservableList<Event> observableEventList = new ObservableArrayList<>();
     private ObservableField<String> observableString = new ObservableField<>();
     private ObservableBoolean isLoading = new ObservableBoolean(false);
     private ObservableBoolean isSynchronized = new ObservableBoolean(false);
-    private List<Event> editedLocalList = new ArrayList<>();
 
     public ObservableField<String> getObservableString() {
         return observableString;
@@ -53,14 +51,14 @@ public class Repository {
         this.isLoading = isLoading;
     }
 
-    private Repository(Context context) {
+    private DataManager(Context context) {
         db = MainDB.get(context);
         apiService = APIServiceConstructor.createService(APIService.class);
     }
 
-    public static Repository getInstance(Context context) {
-        if(INSTANCE == null){
-            INSTANCE = new Repository(context);
+    public static DataManager getInstance(Context context) {
+        if (INSTANCE == null) {
+            INSTANCE = new DataManager(context);
         }
         return INSTANCE;
     }
@@ -274,7 +272,7 @@ public class Repository {
                     new Thread() {
                         @Override
                         public void run() {
-                            editedLocalList.remove(event);
+
                             isSynchronized.set(true);
                             getUserAndEvents(email, password);
                         }
@@ -286,7 +284,7 @@ public class Repository {
             public void onFailure(Call<Void> call, Throwable t) {
                 isLoading.set(false);
                 isSynchronized.set(false);
-                editedLocalList.add(event);
+
             }
         });
     }
@@ -336,7 +334,7 @@ public class Repository {
             public void onFailure(Call<Void> call, Throwable t) {
                 isLoading.set(false);
                 isSynchronized.set(false);
-                editedLocalList.add(event);
+
             }
         });
     }
@@ -376,7 +374,7 @@ public class Repository {
             public void onFailure(Call<Void> call, Throwable t) {
                 isLoading.set(false);
                 isSynchronized.set(false);
-                editedLocalList.add(event);
+
             }
         });
     }

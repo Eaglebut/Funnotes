@@ -5,14 +5,14 @@
 
     <data>
         <variable
-            name="repository"
-            type="ru.eaglebutt.funnotes.Repository" />
+            name="dataManager"
+            type="ru.eaglebutt.funnotes.DataManager" />
     </data>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:refreshing = "@{repository.isLoading}"
+        app:refreshing="@{dataManager.isLoading}"
         >
 
 
@@ -110,7 +110,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="@{String.valueOf(repository.isLoading) + '\n' + String.valueOf(repository.isSynchronized)}"
+                android:text="@{String.valueOf(dataManager.isLoading) + '\n' + String.valueOf(dataManager.isSynchronized)}"
                 android:textSize="22sp"
                 tools:text="TEST" />
 
@@ -121,7 +121,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/text_data"
-            android:text="@{repository.observableString.toString()}"
+            android:text="@{dataManager.observableString.toString()}"
             tools:textSize="24sp"
             tools:text="test"
             />

@@ -17,13 +17,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Repository repository = Repository.getInstance(this);
+        DataManager dataManager = DataManager.getInstance(this);
 
 
         ActivityMainBinding binding =
                 DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        binding.setRepository(repository);
+        binding.setRepository(dataManager);
 
         final Button addUserButton = findViewById(R.id.addUser);
         final Button updateUserButton = findViewById(R.id.updateUser);
@@ -47,26 +47,26 @@ public class MainActivity extends AppCompatActivity {
         event.setStartTime(System.currentTimeMillis());
         event.setEndTime(System.currentTimeMillis() + 500000);
 
-        repository.getUserFromDB();
-        repository.getUserAndEvents(user.getEmail(), user.getPassword());
+        dataManager.getUserFromDB();
+        dataManager.getUserAndEvents(user.getEmail(), user.getPassword());
 
         getAllButton.setOnClickListener(v -> {
-           repository.getUserAndEvents(user.getEmail(), user.getPassword());
+            dataManager.getUserAndEvents(user.getEmail(), user.getPassword());
         });
 
         addUserButton.setOnClickListener(v -> {
             user.setName("Notchanged");
-            repository.addUser(user);
+            dataManager.addUser(user);
         });
 
 
         deleteUserButton.setOnClickListener(v -> {
-            repository.deleteUser(user.getEmail(), user.getPassword());
+            dataManager.deleteUser(user.getEmail(), user.getPassword());
         });
 
         updateUserButton.setOnClickListener(v -> {
             user.setName("Changed");
-           repository.updateUser(user.getEmail(),user.getPassword(), user);
+            dataManager.updateUser(user.getEmail(), user.getPassword(), user);
         });
 
         addEventButton.setOnClickListener(v -> {
@@ -74,20 +74,20 @@ public class MainActivity extends AppCompatActivity {
             event.setLocalId(0);
             event.setStatus(Event.STATUSES.SYNCHRONIZED);
             event.setServerId(0);
-            repository.addEventInThread(user.getEmail(), user.getPassword(), event);
+            dataManager.addEventInThread(user.getEmail(), user.getPassword(), event);
         });
 
 
         deleteEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
-            repository.deleteEventInThread(user.getEmail(), user.getPassword(), id);
+            dataManager.deleteEventInThread(user.getEmail(), user.getPassword(), id);
         });
 
         updateEventButton.setOnClickListener(v -> {
             int id = Integer.parseInt(editText.getText().toString().isEmpty() ? "0" : editText.getText().toString());
             event.setTitle("Updated");
             event.setLocalId(id);
-            repository.updateEventInThread(user.getEmail(), user.getPassword(), event);
+            dataManager.updateEventInThread(user.getEmail(), user.getPassword(), event);
         });
     }
 }
