@@ -5,7 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import ru.eaglebutt.funnotes.R;
 
@@ -61,5 +64,14 @@ public class RegistrationFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_registration, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        view.findViewById(R.id.go_to_second_registration_button).setOnClickListener(v -> {
+            NavHostFragment.findNavController(RegistrationFragment.this)
+                    .navigate(R.id.action_registrationFragment_to_secondRegistrationFragment);
+        });
     }
 }

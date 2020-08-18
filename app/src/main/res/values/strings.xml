@@ -2,4 +2,14 @@
     <string name="app_name">FunNotes</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="registration_string">Регистрация</string>
+    <string name="e_mail_string">E-mail</string>
+    <string name="password_hint_string">Пароль</string>
+    <string name="repeat_password_hint">Повторите пароль</string>
+    <string name="next_string">Продолжить</string>
+    <string name="register_string">Зарегистрироваться</string>
+    <string name="name_string">Имя</string>
+    <string name="surname_string">Фамилия</string>
+    <string name="sign_in_string">Вход</string>
+    <string name="sign_in_button_string">Войти</string>
 </resources>

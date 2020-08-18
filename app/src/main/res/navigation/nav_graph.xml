@@ -22,12 +22,22 @@
         android:label="fragment_registration"
         tools:layout="@layout/fragment_registration">
         <action
-            android:id="@+id/action_registrationFragment_to_entranceFragment"
-            app:destination="@id/entranceFragment" />
+            android:id="@+id/action_registrationFragment_to_secondRegistrationFragment"
+            app:destination="@id/secondRegistrationFragment" />
     </fragment>
     <fragment
         android:id="@+id/entranceFragment"
         android:name="ru.eaglebutt.funnotes.fragments.EntranceFragment"
         android:label="fragment_entrance"
         tools:layout="@layout/fragment_entrance" />
+    <fragment
+        android:id="@+id/secondRegistrationFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.SecondRegistrationFragment"
+        android:label="fragment_second_registration"
+        tools:layout="@layout/fragment_second_registration">
+        <action
+            android:id="@+id/action_secondRegistrationFragment_to_entranceFragment"
+            app:destination="@id/entranceFragment"
+            app:popUpTo="@id/startFragment" />
+    </fragment>
 </navigation>
