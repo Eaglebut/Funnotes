@@ -3,41 +3,62 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/startFragment">
+    app:startDestination="@id/todayFragment">
     <fragment
-        android:id="@+id/startFragment"
-        android:name="ru.eaglebutt.funnotes.fragments.StartFragment"
-        android:label="fragment_start"
-        tools:layout="@layout/fragment_start">
+        android:id="@+id/todayFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.TodayFragment"
+        android:label="fragment_today"
+        tools:layout="@layout/fragment_today">
         <action
-            android:id="@+id/action_startFragment_to_registrationFragment"
-            app:destination="@id/registrationFragment" />
-        <action
-            android:id="@+id/action_startFragment_to_entranceFragment"
-            app:destination="@id/entranceFragment" />
+            android:id="@+id/action_todayFragment_to_startFragment"
+            app:destination="@id/registration_graph"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
-    <fragment
-        android:id="@+id/registrationFragment"
-        android:name="ru.eaglebutt.funnotes.fragments.RegistrationFragment"
-        android:label="fragment_registration"
-        tools:layout="@layout/fragment_registration">
-        <action
-            android:id="@+id/action_registrationFragment_to_secondRegistrationFragment"
-            app:destination="@id/secondRegistrationFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/entranceFragment"
-        android:name="ru.eaglebutt.funnotes.fragments.EntranceFragment"
-        android:label="fragment_entrance"
-        tools:layout="@layout/fragment_entrance" />
-    <fragment
-        android:id="@+id/secondRegistrationFragment"
-        android:name="ru.eaglebutt.funnotes.fragments.SecondRegistrationFragment"
-        android:label="fragment_second_registration"
-        tools:layout="@layout/fragment_second_registration">
-        <action
-            android:id="@+id/action_secondRegistrationFragment_to_entranceFragment"
-            app:destination="@id/entranceFragment"
-            app:popUpTo="@id/startFragment" />
-    </fragment>
+    <navigation
+        android:id="@+id/registration_graph"
+        app:startDestination="@id/startFragment">
+        <fragment
+            android:id="@+id/entranceFragment"
+            android:name="ru.eaglebutt.funnotes.fragments.EntranceFragment"
+            android:label="fragment_entrance"
+            tools:layout="@layout/fragment_entrance">
+            <action
+                android:id="@+id/action_entranceFragment_to_todayFragment"
+                app:destination="@id/todayFragment"
+                app:popUpTo="@id/nav_graph"
+                app:popUpToInclusive="true" />
+        </fragment>
+        <fragment
+            android:id="@+id/secondRegistrationFragment"
+            android:name="ru.eaglebutt.funnotes.fragments.SecondRegistrationFragment"
+            android:label="fragment_second_registration"
+            tools:layout="@layout/fragment_second_registration">
+            <action
+                android:id="@+id/action_secondRegistrationFragment_to_entranceFragment"
+                app:destination="@id/entranceFragment"
+                app:popUpTo="@id/startFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/registrationFragment"
+            android:name="ru.eaglebutt.funnotes.fragments.RegistrationFragment"
+            android:label="fragment_registration"
+            tools:layout="@layout/fragment_registration">
+            <action
+                android:id="@+id/action_registrationFragment_to_secondRegistrationFragment"
+                app:destination="@id/secondRegistrationFragment" />
+        </fragment>
+        <fragment
+            android:id="@+id/startFragment"
+            android:name="ru.eaglebutt.funnotes.fragments.StartFragment"
+            android:label="fragment_start"
+            tools:layout="@layout/fragment_start">
+            <action
+                android:id="@+id/action_startFragment_to_registrationFragment"
+                app:destination="@id/registrationFragment" />
+            <action
+                android:id="@+id/action_startFragment_to_entranceFragment"
+                app:destination="@id/entranceFragment" />
+        </fragment>
+    </navigation>
 </navigation>
