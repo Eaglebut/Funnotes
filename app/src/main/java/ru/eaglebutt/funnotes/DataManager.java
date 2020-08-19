@@ -112,7 +112,8 @@ public class DataManager {
                             new Thread(){
                                 @Override
                                 public void run() {
-                                    getUserAndEvents(user.getEmail(), user.getPassword());
+                                    observableUser.set(user);
+                                    getUserAndEvents();
                                 }
                             }.start();
                         }
@@ -127,14 +128,14 @@ public class DataManager {
         }.start();
     }
 
-    public void deleteUser(String email, String password) {
+    public void deleteUser() {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (!beforeStart() || observableUser.get() == null) {
                     return;
                 }
-                Call<Void> deleteUser = apiService.deleteUser(email, password);
+                Call<Void> deleteUser = apiService.deleteUser(observableUser.get().getEmail(), observableUser.get().getPassword());
                 deleteUser.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
@@ -162,21 +163,21 @@ public class DataManager {
     }
 
 
-    public void updateUser(String email, String password, User user) {
+    public void updateUser(User user) {
 
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (!beforeStart() || observableUser.get() == null) {
                     return;
                 }
-                Call<Void> updateUser = apiService.updateUser(email, password, user);
+                Call<Void> updateUser = apiService.updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), user);
                 updateUser.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
                         isLoading.set(false);
                         if (response.isSuccessful()) {
-                            getUserAndEvents(email, password);
+                            getUserAndEvents();
                         }
                     }
 
@@ -190,15 +191,15 @@ public class DataManager {
     }
 
 
-    public void getUserAndEvents(String email, String password) {
+    public void getUserAndEvents() {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (!beforeStart() || observableUser.get() == null) {
                     return;
                 }
                 Log.d("THREADS", "getUserAndEvents: " + Thread.currentThread().getName());
-                Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(email, password);
+                Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(observableUser.get().getEmail(), observableUser.get().getPassword());
 
                 responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
                     @Override
@@ -241,20 +242,20 @@ public class DataManager {
     }
 
 
-    public void addEventInThread(String email, String password, Event event) {
+    public void addEventInThread(Event event) {
         Thread thread = new Thread() {
             @Override
             public void run() {
                 if (!beforeStart()) {
                     return;
                 }
-                addEvent(email, password, event);
+                addEvent(event);
             }
         };
         thread.start();
     }
 
-    public void addEvent(String email, String password, Event event) {
+    public void addEvent(Event event) {
         Log.d("THREADS", "addEvent: " + Thread.currentThread().getName());
         if (event.getStatus() != Event.STATUSES.NEW) {
             event.update();
@@ -263,7 +264,7 @@ public class DataManager {
             db.service().insert(event);
             loadDataFromDB();
         }
-        Call<Void> putEvent = apiService.putEvent(email, password, event);
+        Call<Void> putEvent = apiService.putEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
         putEvent.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
@@ -274,7 +275,7 @@ public class DataManager {
                         public void run() {
 
                             isSynchronized.set(true);
-                            getUserAndEvents(email, password);
+                            getUserAndEvents();
                         }
                     }.start();
                 }
@@ -289,19 +290,19 @@ public class DataManager {
         });
     }
 
-    public void deleteEventInThread(String email, String password, int id) {
+    public void deleteEventInThread(int id) {
         new Thread() {
             @Override
             public void run() {
                 if (!beforeStart()) {
                     return;
                 }
-                deleteEvent(email, password, id);
+                deleteEvent(id);
             }
         }.start();
     }
 
-    public void deleteEvent(String email, String password, int id) {
+    public void deleteEvent(int id) {
         if (id == 0) {
             return;
         }
@@ -322,12 +323,12 @@ public class DataManager {
             db.service().update(event);
         }
 
-        Call<Void> deleteEvent = apiService.deleteEvent(email, password, event.getServerId());
+        Call<Void> deleteEvent = apiService.deleteEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event.getServerId());
         deleteEvent.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 isLoading.set(false);
-                getUserAndEvents(email, password);
+                getUserAndEvents();
             }
 
             @Override
@@ -340,33 +341,33 @@ public class DataManager {
     }
 
 
-    public void updateEventInThread(String email, String password, Event event) {
+    public void updateEventInThread(Event event) {
         new Thread() {
             @Override
             public void run() {
                 if (!beforeStart()) {
                     return;
                 }
-                updateEvent(email, password, event);
+                updateEvent(event);
             }
         }.start();
     }
 
 
-    public void updateEvent(String email, String password, Event event) {
+    public void updateEvent(Event event) {
         event.setServerId(db.service().findEventByLocalId(event.getLocalId()).getServerId());
         event.setStatus(Event.STATUSES.UPDATED);
         event.update();
         db.service().update(event);
         loadDataFromDB();
-        Call<Void> updateEventCall = apiService.putEvent(email, password, event);
+        Call<Void> updateEventCall = apiService.putEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
         updateEventCall.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 isLoading.set(false);
 
                 if (response.isSuccessful()) {
-                    getUserAndEvents(email, password);
+                    getUserAndEvents();
                 }
             }
 
@@ -386,11 +387,11 @@ public class DataManager {
         List<Event> notUpdatedList = db.service().getNotUpdatedEvents();
         for (Event event : notUpdatedList) {
             if (event.getStatus() == Event.STATUSES.NEW) {
-                addEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
+                addEvent(event);
             } else if (event.getStatus() == Event.STATUSES.DELETED) {
-                deleteEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event.getLocalId());
+                deleteEvent(event.getLocalId());
             } else if (event.getStatus() == Event.STATUSES.UPDATED) {
-                updateEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
+                updateEvent(event);
             }
         }
     }

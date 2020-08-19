@@ -46,5 +46,6 @@
         android:text="@string/sign_in_button_string"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword"
+        style="@style/AppTheme"
         tools:layout_editor_absoluteX="159dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

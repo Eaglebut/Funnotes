@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/todayFragment"
+        android:enabled="true"
+        android:title="@string/my_day_string" />
+    <item
+        android:id="@+id/tasksFragment"
+        android:enabled="true"
+        android:title="@string/tasks_string" />
+    <item
+        android:id="@+id/plus"
+        android:enabled="true"
+        android:icon="@android:drawable/ic_menu_add"
+        android:title="" />
+    <item
+        android:id="@+id/tipsFragment"
+        android:enabled="true"
+        android:title="@string/tips_string" />
+    <item
+        android:id="@+id/profileFragment"
+        android:enabled="true"
+        android:title="@string/profile_string" />
+
+</menu>

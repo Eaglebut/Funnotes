@@ -61,4 +61,19 @@
                 app:destination="@id/entranceFragment" />
         </fragment>
     </navigation>
+    <fragment
+        android:id="@+id/tasksFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.TasksFragment"
+        android:label="fragment_tasks"
+        tools:layout="@layout/fragment_tasks" />
+    <fragment
+        android:id="@+id/tipsFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.TipsFragment"
+        android:label="fragment_tips"
+        tools:layout="@layout/fragment_tips" />
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.ProfileFragment"
+        android:label="fragment_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>

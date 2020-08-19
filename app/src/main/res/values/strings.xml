@@ -12,4 +12,8 @@
     <string name="surname_string">Фамилия</string>
     <string name="sign_in_string">Вход</string>
     <string name="sign_in_button_string">Войти</string>
+    <string name="my_day_string">Мой день</string>
+    <string name="tasks_string">Задачи</string>
+    <string name="tips_string">Советы</string>
+    <string name="profile_string">Профиль</string>
 </resources>
