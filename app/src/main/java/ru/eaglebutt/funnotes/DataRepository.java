@@ -4,11 +4,11 @@ package ru.eaglebutt.funnotes;
 import android.content.Context;
 import android.util.Log;
 
-import androidx.databinding.ObservableArrayList;
 import androidx.databinding.ObservableBoolean;
 import androidx.databinding.ObservableField;
-import androidx.databinding.ObservableList;
+import androidx.lifecycle.MutableLiveData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -21,18 +21,22 @@ import ru.eaglebutt.funnotes.model.AllUsersResponseData;
 import ru.eaglebutt.funnotes.model.Event;
 import ru.eaglebutt.funnotes.model.User;
 
-public class DataManager {
+public class DataRepository {
     private MainDB db;
     private APIService apiService;
-    private static DataManager INSTANCE = null;
+    private static DataRepository INSTANCE = null;
+
+
     private ObservableField<User> observableUser = new ObservableField<>();
-    private ObservableList<Event> observableEventList = new ObservableArrayList<>();
-    private ObservableField<String> observableString = new ObservableField<>();
+    private List<Event> eventList = new ArrayList<>();
+    private MutableLiveData<List<Event>> liveEventList = new MutableLiveData<>();
     private ObservableBoolean isLoading = new ObservableBoolean(false);
     private ObservableBoolean isSynchronized = new ObservableBoolean(false);
 
-    public ObservableField<String> getObservableString() {
-        return observableString;
+
+    private DataRepository(Context context) {
+        db = MainDB.get(context);
+        apiService = APIServiceConstructor.createService(APIService.class);
     }
 
     public ObservableBoolean getIsSynchronized() {
@@ -51,31 +55,23 @@ public class DataManager {
         this.isLoading = isLoading;
     }
 
-    private DataManager(Context context) {
-        db = MainDB.get(context);
-        apiService = APIServiceConstructor.createService(APIService.class);
-    }
-
-    public static DataManager getInstance(Context context) {
+    public static DataRepository getInstance(Context context) {
         if (INSTANCE == null) {
-            INSTANCE = new DataManager(context);
+            INSTANCE = new DataRepository(context);
         }
         return INSTANCE;
     }
 
-    private void updateObservableString() {
+    public MutableLiveData<List<Event>> getLiveEventList() {
+        return liveEventList;
+    }
+
+    private void updateLiveData() {
         if (observableUser.get() == null) {
-            observableString.set("");
+            liveEventList.setValue(null);
             return;
         }
-        StringBuilder builder = new StringBuilder();
-        builder.append(observableUser.get().toString())
-                .append("\n");
-        for (Event event : observableEventList) {
-            builder.append(event.toString());
-            builder.append("\n");
-        }
-        observableString.set(builder.toString());
+        liveEventList.postValue(eventList);
     }
 
 
@@ -102,7 +98,7 @@ public class DataManager {
                 db.service().deleteUser();
                 db.service().deleteAllEvents();
                 observableUser.set(null);
-                observableEventList.clear();
+                eventList.clear();
                 Call<Void> putUser = apiService.putUser(user);
                 putUser.enqueue(new Callback<Void>() {
                     @Override
@@ -146,8 +142,7 @@ public class DataManager {
                                 public void run() {
                                     db.service().deleteUser();
                                     observableUser.set(null);
-                                    observableEventList.clear();
-                                    observableString.set(null);
+                                    eventList.clear();
                                 }
                             }.start();
                         }
@@ -200,7 +195,7 @@ public class DataManager {
                 }
                 Log.d("THREADS", "getUserAndEvents: " + Thread.currentThread().getName());
                 Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(observableUser.get().getEmail(), observableUser.get().getPassword());
-
+                loadDataFromDB();
                 responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
                     @Override
                     public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
@@ -402,9 +397,9 @@ public class DataManager {
             return;
         }
         observableUser.set(user.get(0));
-        observableEventList.clear();
-        observableEventList.addAll(db.service().getEvents());
-        updateObservableString();
+        eventList.clear();
+        eventList.addAll(db.service().getEvents());
+        updateLiveData();
     }
 
 
@@ -412,8 +407,8 @@ public class DataManager {
         return observableUser;
     }
 
-    public ObservableList<Event> getObservableEventList() {
-        return observableEventList;
+    public List<Event> getEventList() {
+        return eventList;
     }
 
     private boolean beforeStart() {
@@ -423,7 +418,7 @@ public class DataManager {
             synchronizeWithServer();
         isLoading.set(true);
         loadDataFromDB();
-        updateObservableString();
+        updateLiveData();
         return true;
     }
 
