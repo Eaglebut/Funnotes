@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">FunNotes</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment">Раздел находится в работе, скоро будет</string>
     <string name="registration_string">Регистрация</string>
     <string name="e_mail_string">E-mail</string>
     <string name="password_hint_string">Пароль</string>
@@ -16,4 +15,5 @@
     <string name="tasks_string">Задачи</string>
     <string name="tips_string">Советы</string>
     <string name="profile_string">Профиль</string>
+    <string name="edit_string">Редактировать</string>
 </resources>

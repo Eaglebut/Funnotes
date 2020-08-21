@@ -2,6 +2,7 @@ package ru.eaglebutt.funnotes;
 
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.databinding.ObservableBoolean;
@@ -9,6 +10,8 @@ import androidx.databinding.ObservableField;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -32,7 +35,9 @@ public class DataRepository {
     private MutableLiveData<List<Event>> liveEventList = new MutableLiveData<>();
     private ObservableBoolean isLoading = new ObservableBoolean(false);
     private ObservableBoolean isSynchronized = new ObservableBoolean(false);
-
+    private static int TODAY_DATA = 0;
+    private static int ALL_DATA = 1;
+    private int type = 1;
 
     private DataRepository(Context context) {
         db = MainDB.get(context);
@@ -92,7 +97,7 @@ public class DataRepository {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (beforeStart()) {
                     return;
                 }
                 db.service().deleteUser();
@@ -128,7 +133,7 @@ public class DataRepository {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart() || observableUser.get() == null) {
+                if (beforeStart() || observableUser.get() == null) {
                     return;
                 }
                 Call<Void> deleteUser = apiService.deleteUser(observableUser.get().getEmail(), observableUser.get().getPassword());
@@ -163,7 +168,7 @@ public class DataRepository {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart() || observableUser.get() == null) {
+                if (beforeStart() || observableUser.get() == null) {
                     return;
                 }
                 Call<Void> updateUser = apiService.updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), user);
@@ -185,63 +190,15 @@ public class DataRepository {
         }.start();
     }
 
-
     public void getUserAndEvents() {
-        new Thread() {
-            @Override
-            public void run() {
-                if (!beforeStart() || observableUser.get() == null) {
-                    return;
-                }
-                Log.d("THREADS", "getUserAndEvents: " + Thread.currentThread().getName());
-                Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(observableUser.get().getEmail(), observableUser.get().getPassword());
-                loadDataFromDB();
-                responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
-                    @Override
-                    public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
-                        isLoading.set(false);
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                if (!response.isSuccessful()) {
-                                    return;
-                                }
-                                if (response.body() == null) {
-                                    return;
-                                }
-                                isSynchronized.set(true);
-                                db.service().deleteUser();
-                                db.service().deleteAllEvents();
-                                User user = response.body().getUser();
-                                user.setSynchronized(true);
-                                List<Event> eventList = response.body().getEvents();
-                                for (Event event : eventList) {
-                                    event.setStatus(Event.STATUSES.SYNCHRONIZED);
-                                    event.update();
-                                    db.service().insert(event);
-                                }
-                                db.service().insert(user);
-                                loadDataFromDB();
-                            }
-                        }.start();
-                    }
-
-                    @Override
-                    public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
-                        isLoading.set(false);
-                        isSynchronized.set(false);
-                    }
-                });
-            }
-        }.start();
+        new GetUserAndEvents().execute();
     }
-
 
     public void addEventInThread(Event event) {
         Thread thread = new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (beforeStart()) {
                     return;
                 }
                 addEvent(event);
@@ -257,7 +214,7 @@ public class DataRepository {
             event.setCreated(System.currentTimeMillis());
             event.setStatus(Event.STATUSES.NEW);
             db.service().insert(event);
-            loadDataFromDB();
+            new LoadAllDataFromDB().execute();
         }
         Call<Void> putEvent = apiService.putEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
         putEvent.enqueue(new Callback<Void>() {
@@ -289,12 +246,50 @@ public class DataRepository {
         new Thread() {
             @Override
             public void run() {
-                if (!beforeStart()) {
+                if (beforeStart()) {
                     return;
                 }
                 deleteEvent(id);
             }
         }.start();
+    }
+
+    public void updateEventInThread(Event event) {
+        new Thread() {
+            @Override
+            public void run() {
+                if (beforeStart()) {
+                    return;
+                }
+                updateEvent(event);
+            }
+        }.start();
+    }
+
+    public void updateEvent(Event event) {
+        event.setServerId(db.service().findEventByLocalId(event.getLocalId()).getServerId());
+        event.setStatus(Event.STATUSES.UPDATED);
+        event.update();
+        db.service().update(event);
+        new LoadAllDataFromDB().execute();
+        Call<Void> updateEventCall = apiService.putEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
+        updateEventCall.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                isLoading.set(false);
+
+                if (response.isSuccessful()) {
+                    getUserAndEvents();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                isLoading.set(false);
+                isSynchronized.set(false);
+
+            }
+        });
     }
 
     public void deleteEvent(int id) {
@@ -335,44 +330,24 @@ public class DataRepository {
         });
     }
 
-
-    public void updateEventInThread(Event event) {
-        new Thread() {
-            @Override
-            public void run() {
-                if (!beforeStart()) {
-                    return;
-                }
-                updateEvent(event);
-            }
-        }.start();
+    private Date atEndOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        return calendar.getTime();
     }
 
-
-    public void updateEvent(Event event) {
-        event.setServerId(db.service().findEventByLocalId(event.getLocalId()).getServerId());
-        event.setStatus(Event.STATUSES.UPDATED);
-        event.update();
-        db.service().update(event);
-        loadDataFromDB();
-        Call<Void> updateEventCall = apiService.putEvent(observableUser.get().getEmail(), observableUser.get().getPassword(), event);
-        updateEventCall.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                isLoading.set(false);
-
-                if (response.isSuccessful()) {
-                    getUserAndEvents();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                isLoading.set(false);
-                isSynchronized.set(false);
-
-            }
-        });
+    private Date atStartOfDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        return calendar.getTime();
     }
 
 
@@ -391,17 +366,23 @@ public class DataRepository {
         }
     }
 
-    public void loadDataFromDB() {
-        List<User> user = db.service().getUser();
-        if (user == null || user.isEmpty()) {
-            return;
-        }
-        observableUser.set(user.get(0));
-        eventList.clear();
-        eventList.addAll(db.service().getEvents());
-        updateLiveData();
+    private boolean beforeStart() {
+        if (isLoading.get())
+            return true;
+        if (!isSynchronized.get())
+            synchronizeWithServer();
+        isLoading.set(true);
+        if (type == ALL_DATA)
+            new LoadAllDataFromDB().execute();
+        else
+            new LoadTodayDataFromDB().execute();
+        return false;
     }
 
+    public void getTodayTasks() {
+        type = TODAY_DATA;
+        new GetTodayTasks().execute();
+    }
 
     public ObservableField<User> getObservableUser() {
         return observableUser;
@@ -411,15 +392,117 @@ public class DataRepository {
         return eventList;
     }
 
-    private boolean beforeStart() {
-        if (isLoading.get())
-            return false;
-        if (!isSynchronized.get())
-            synchronizeWithServer();
-        isLoading.set(true);
-        loadDataFromDB();
-        updateLiveData();
-        return true;
+    private class GetUserAndEvents extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (beforeStart() || observableUser.get() == null) {
+                return null;
+            }
+            Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(observableUser.get().getEmail(), observableUser.get().getPassword());
+            responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
+                @Override
+                public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
+                    isLoading.set(false);
+                    if (!response.isSuccessful()) {
+                        return;
+                    }
+                    if (response.body() == null) {
+                        return;
+                    }
+                    isSynchronized.set(true);
+                    new OnResponseGetUserAndEvents().execute(response.body());
+                }
+
+                @Override
+                public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
+                    isLoading.set(false);
+                    isSynchronized.set(false);
+                }
+            });
+            return null;
+        }
+    }
+
+    class OnResponseGetUserAndEvents extends AsyncTask<AllUsersResponseData, Void, Void> {
+
+        @Override
+        protected Void doInBackground(AllUsersResponseData... allUsersResponseData) {
+            db.service().deleteUser();
+            db.service().deleteAllEvents();
+            User user = allUsersResponseData[0].getUser();
+            user.setSynchronized(true);
+            List<Event> eventList = allUsersResponseData[0].getEvents();
+            for (Event event : eventList) {
+                event.setStatus(Event.STATUSES.SYNCHRONIZED);
+                event.update();
+                db.service().insert(event);
+            }
+            db.service().insert(user);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (type == ALL_DATA)
+                new LoadAllDataFromDB().execute();
+            else
+                new LoadTodayDataFromDB().execute();
+        }
+    }
+
+    public class LoadAllDataFromDB extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<User> user = db.service().getUser();
+            if (user == null || user.isEmpty()) {
+                return null;
+            }
+            observableUser.set(user.get(0));
+            eventList.clear();
+            eventList.addAll(db.service().getEvents());
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            updateLiveData();
+        }
+    }
+
+    public class LoadTodayDataFromDB extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            List<User> user = db.service().getUser();
+            if (user == null || user.isEmpty()) {
+                return null;
+            }
+            observableUser.set(user.get(0));
+            eventList.clear();
+            Date date = new Date(System.currentTimeMillis());
+            long startTime = atStartOfDay(date).getTime();
+            long endTime = atEndOfDay(date).getTime();
+            eventList.addAll(db.service().getEventsBetweenTime(startTime / 1000, endTime / 1000));
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            updateLiveData();
+        }
+    }
+
+    private class GetTodayTasks extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            new GetUserAndEvents().doInBackground();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            new LoadTodayDataFromDB().execute();
+        }
     }
 
 }

@@ -16,7 +16,7 @@ import java.text.SimpleDateFormat;
 
 import ru.eaglebutt.funnotes.R;
 
-public class TodayEventViewHolder extends RecyclerView.ViewHolder {
+public class EventViewHolder extends RecyclerView.ViewHolder {
 
     int paintFlags;
     private TextView titleView;
@@ -28,7 +28,7 @@ public class TodayEventViewHolder extends RecyclerView.ViewHolder {
     private CheckBox isDoneCheckBox;
 
 
-    public TodayEventViewHolder(@NonNull View itemView) {
+    public EventViewHolder(@NonNull View itemView) {
         super(itemView);
         titleView = itemView.findViewById(R.id.title_my_day);
         timeView = itemView.findViewById(R.id.time_my_day);

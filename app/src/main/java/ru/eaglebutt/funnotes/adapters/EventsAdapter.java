@@ -14,12 +14,12 @@ import java.util.List;
 import ru.eaglebutt.funnotes.R;
 import ru.eaglebutt.funnotes.model.Event;
 
-public class TodayEventsAdapter extends RecyclerView.Adapter<TodayEventViewHolder> {
+public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
 
     private static final String TAG = "TestAdapter";
     private List<Event> mDataSet;
 
-    public TodayEventsAdapter(List<Event> mDataSet) {
+    public EventsAdapter(List<Event> mDataSet) {
         this.mDataSet = new ArrayList<>(mDataSet);
     }
 
@@ -30,14 +30,14 @@ public class TodayEventsAdapter extends RecyclerView.Adapter<TodayEventViewHolde
 
     @NonNull
     @Override
-    public TodayEventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.event_layout, parent, false);
-        return new TodayEventViewHolder(view);
+        return new EventViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull TodayEventViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
         Log.d(TAG, "Element " + position + " set.");
         if (mDataSet == null || mDataSet.isEmpty()) {
             return;

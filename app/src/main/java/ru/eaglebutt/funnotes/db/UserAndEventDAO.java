@@ -12,7 +12,7 @@ import ru.eaglebutt.funnotes.model.Event;
 import ru.eaglebutt.funnotes.model.User;
 
 @Dao
-public interface DBService {
+public interface UserAndEventDAO {
 
     @Query("DELETE FROM user")
     void deleteUser();
@@ -37,6 +37,9 @@ public interface DBService {
 
     @Query("select * from events where not status = 0")
     List<Event> getNotUpdatedEvents();
+
+    @Query("select * from events where startTime >= :startTime and startTime <= :endTime")
+    List<Event> getEventsBetweenTime(long startTime, long endTime);
 
     @Insert
     void insert(Event event);

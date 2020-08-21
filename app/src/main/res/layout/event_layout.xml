@@ -72,7 +72,8 @@
         android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/edit_string"
+        app:layout_constraintTop_toBottomOf="@+id/title_my_day"
         app:srcCompat="@android:drawable/ic_menu_edit" />
 
     <androidx.constraintlayout.widget.Guideline

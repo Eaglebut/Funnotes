@@ -13,7 +13,7 @@ import ru.eaglebutt.funnotes.model.User;
 @Database(entities = {Event.class, User.class}, version = 12)
 public abstract class MainDB extends RoomDatabase {
 
-    public abstract DBService service();
+    public abstract UserAndEventDAO service();
     private static final String DB_NAME = "events.db";
     private static volatile MainDB INSTANCE = null;
 

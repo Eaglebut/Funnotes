@@ -23,7 +23,7 @@ import java.util.Date;
 
 import ru.eaglebutt.funnotes.DataRepository;
 import ru.eaglebutt.funnotes.R;
-import ru.eaglebutt.funnotes.adapters.TodayEventsAdapter;
+import ru.eaglebutt.funnotes.adapters.EventsAdapter;
 import ru.eaglebutt.funnotes.view_models.EventListViewModel;
 
 
@@ -32,7 +32,7 @@ public class TodayFragment extends Fragment {
     private DataRepository repository;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private TodayEventsAdapter mAdapter;
+    private EventsAdapter mAdapter;
     private EventListViewModel viewModel;
     private SwipeRefreshLayout refreshLayout;
     private Toolbar toolbar;
@@ -92,14 +92,13 @@ public class TodayFragment extends Fragment {
         recyclerView = (RecyclerView) view.findViewById(R.id.today_recycler_view);
         layoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(layoutManager);
-        mAdapter = new TodayEventsAdapter(repository.getEventList());
+        mAdapter = new EventsAdapter(repository.getEventList());
         recyclerView.setAdapter(mAdapter);
     }
 
     private void setUpRefreshLayout(View view) {
         refreshLayout = view.findViewById(R.id.today_refresh_layout);
-        refreshLayout.setOnRefreshListener(() -> repository.getUserAndEvents());
-
+        refreshLayout.setOnRefreshListener(() -> repository.getTodayTasks());
     }
 
     private void checkUser(View view) {
