@@ -13,24 +13,26 @@ import ru.eaglebutt.funnotes.model.User;
 @Database(entities = {Event.class, User.class}, version = 12)
 public abstract class MainDB extends RoomDatabase {
 
-    public abstract UserAndEventDAO service();
+    public synchronized static MainDB get(Context context) {
+        if (INSTANCE == null) {
+            INSTANCE = create(context, false);
+        }
+        return (INSTANCE);
+    }
+
+    public abstract EventDAO eventDAO();
+
     private static final String DB_NAME = "events.db";
     private static volatile MainDB INSTANCE = null;
 
-    public synchronized static MainDB get(Context context){
-        if (INSTANCE == null){
-            INSTANCE = create(context, false);
-        }
-        return(INSTANCE);
-    }
+    public abstract UserDAO userDAO();
 
-    private static MainDB create(Context context, boolean memoryOnly){
+    private static MainDB create(Context context, boolean memoryOnly) {
         RoomDatabase.Builder<MainDB> builder;
         if (memoryOnly) {
             builder = Room.inMemoryDatabaseBuilder(context.getApplicationContext(),
                     MainDB.class);
-        }
-        else {
+        } else {
             builder = Room.databaseBuilder(context.getApplicationContext(), MainDB.class,
                     DB_NAME)
             .fallbackToDestructiveMigration();

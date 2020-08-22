@@ -8,24 +8,22 @@ import androidx.lifecycle.LiveData;
 
 import java.util.List;
 
-import ru.eaglebutt.funnotes.DataRepository;
 import ru.eaglebutt.funnotes.model.Event;
+import ru.eaglebutt.funnotes.repositories.EventRepository;
 
 public class EventListViewModel extends AndroidViewModel {
 
     private LiveData<List<Event>> eventLiveData;
-    private DataRepository repository;
+    private EventRepository repository;
 
     public EventListViewModel(@NonNull Application application) {
         super(application);
-        repository = DataRepository.getInstance(application);
+        repository = EventRepository.getInstance(application);
         eventLiveData = repository.getLiveEventList();
     }
-
 
     public LiveData<List<Event>> getEventLiveData() {
         return eventLiveData;
     }
-
 
 }

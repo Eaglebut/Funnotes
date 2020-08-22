@@ -10,9 +10,11 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import ru.eaglebutt.funnotes.repositories.UserRepository;
+
 public class MainActivity extends AppCompatActivity {
 
-    private DataRepository manager;
+    private UserRepository userRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,9 +23,9 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupWithNavController(bottomNavigationView, navController);
-        manager = DataRepository.getInstance(this.getApplicationContext());
-        manager.getUserFromDB();
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.app_toolbar);
+        userRepository = UserRepository.getInstance(this.getApplicationContext());
+        userRepository.getUserFromDB();
+        Toolbar myToolbar = findViewById(R.id.app_toolbar);
         myToolbar.setTitle("Мой день");
         setSupportActionBar(myToolbar);
         /*User user = new User();

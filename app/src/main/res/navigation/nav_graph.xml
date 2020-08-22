@@ -8,7 +8,7 @@
         android:id="@+id/todayFragment"
         android:name="ru.eaglebutt.funnotes.fragments.TodayFragment"
         android:label="fragment_today"
-        tools:layout="@layout/fragment_today">
+        tools:layout="@layout/fragment_event_list">
         <action
             android:id="@+id/action_todayFragment_to_startFragment"
             app:destination="@id/registration_graph"
@@ -65,7 +65,7 @@
         android:id="@+id/tasksFragment"
         android:name="ru.eaglebutt.funnotes.fragments.TasksFragment"
         android:label="fragment_tasks"
-        tools:layout="@layout/fragment_tasks" />
+        tools:layout="@layout/fragment_event_list" />
     <fragment
         android:id="@+id/tipsFragment"
         android:name="ru.eaglebutt.funnotes.fragments.TipsFragment"

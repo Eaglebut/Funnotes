@@ -9,16 +9,9 @@ import androidx.room.Update;
 import java.util.List;
 
 import ru.eaglebutt.funnotes.model.Event;
-import ru.eaglebutt.funnotes.model.User;
 
 @Dao
-public interface UserAndEventDAO {
-
-    @Query("DELETE FROM user")
-    void deleteUser();
-
-    @Query("SELECT * from user")
-    List<User> getUser();
+public interface EventDAO {
 
     @Query("SELECT * from events")
     List<Event> getEvents();
@@ -47,17 +40,9 @@ public interface UserAndEventDAO {
     @Insert
     void insert(List<Event> eventList);
 
-    @Insert
-    void insert(User user);
-
     @Delete
     void delete(Event event);
-    @Delete
-    void delete(User user);
 
     @Update
     void update(Event event);
-
-    @Update
-    void update(User user);
 }
