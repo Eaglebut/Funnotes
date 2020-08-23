@@ -23,7 +23,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
         this.mDataSet = new ArrayList<>(mDataSet);
     }
 
-    public void setData(List<Event> mDataSet) {
+    public synchronized void setData(List<Event> mDataSet) {
         this.mDataSet = mDataSet;
         notifyDataSetChanged();
     }

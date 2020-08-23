@@ -32,6 +32,7 @@ public class EventRepository {
     private static int TODAY_DATA = 0;
     private static int ALL_DATA = 1;
     private int type = 1;
+    private boolean isSynchronize = false;
 
     private EventRepository(Context context) {
         db = MainDB.get(context);
@@ -80,7 +81,15 @@ public class EventRepository {
             new UpdateEventTask(GetTodayTasks.class).execute(event);
     }
 
-    public void synchronizeWithServer() {
+    public synchronized void synchronizeWithServer() {
+        if (isSynchronize)
+            return;
+        new Thread(() -> {
+            isSynchronize = true;
+            while (!db.eventDAO().getNotUpdatedEvents().isEmpty()) {
+            }
+            isSynchronize = false;
+        }).start();
         List<Event> notUpdatedList = db.eventDAO().getNotUpdatedEvents();
         for (Event event : notUpdatedList) {
             if (event.getStatus() == Event.STATUSES.NEW) {
@@ -94,8 +103,9 @@ public class EventRepository {
     }
 
     private synchronized boolean beforeStart() {
-        if (!db.eventDAO().getNotUpdatedEvents().isEmpty())
+        /*if (!db.eventDAO().getNotUpdatedEvents().isEmpty())
             synchronizeWithServer();
+         */
         if (type == ALL_DATA) {
             new LoadAllEventsFromDB().execute();
         } else {
@@ -277,6 +287,9 @@ public class EventRepository {
                 return null;
             }
             User user = userRepository.getObservableUser().get();
+            if (user == null) {
+                return null;
+            }
             Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(user.getEmail(), user.getPassword());
             responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
                 @Override

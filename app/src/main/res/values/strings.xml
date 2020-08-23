@@ -16,4 +16,5 @@
     <string name="tips_string">Советы</string>
     <string name="profile_string">Профиль</string>
     <string name="edit_string">Редактировать</string>
+    <string name="edit_profile_string">Редактировать</string>
 </resources>

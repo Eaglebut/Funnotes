@@ -76,4 +76,9 @@
         android:name="ru.eaglebutt.funnotes.fragments.ProfileFragment"
         android:label="fragment_profile"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/newTaskFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.NewTaskFragment"
+        android:label="fragment_new_task"
+        tools:layout="@layout/fragment_new_task" />
 </navigation>

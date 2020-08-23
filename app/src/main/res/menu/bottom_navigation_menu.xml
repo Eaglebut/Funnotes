@@ -9,10 +9,10 @@
         android:enabled="true"
         android:title="@string/tasks_string" />
     <item
-        android:id="@+id/plus"
+        android:id="@+id/newTaskFragment"
         android:enabled="true"
         android:icon="@android:drawable/ic_menu_add"
-        android:title="" />
+        android:title="Новая задача" />
     <item
         android:id="@+id/tipsFragment"
         android:enabled="true"
