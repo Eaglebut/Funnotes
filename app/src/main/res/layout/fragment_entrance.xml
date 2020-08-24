@@ -12,31 +12,31 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/sign_in_string"
-        app:layout_constraintBottom_toTopOf="@+id/email_edit_text"
+        app:layout_constraintBottom_toTopOf="@+id/email_edit_text_entrance"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
         tools:layout_editor_absoluteX="228dp" />
 
     <EditText
-        android:id="@+id/email_edit_text"
+        android:id="@+id/email_edit_text_entrance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/e_mail_string"
         android:inputType="textEmailAddress"
-        app:layout_constraintBottom_toTopOf="@+id/editTextTextPassword"
+        app:layout_constraintBottom_toTopOf="@+id/password_edit_text_entrance"
         app:layout_constraintTop_toBottomOf="@+id/textView3"
         tools:layout_editor_absoluteX="97dp" />
 
     <EditText
-        android:id="@+id/editTextTextPassword"
+        android:id="@+id/password_edit_text_entrance"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ems="10"
         android:hint="@string/password_hint_string"
         android:inputType="textPassword"
         app:layout_constraintBottom_toTopOf="@+id/log_in_button"
-        app:layout_constraintTop_toBottomOf="@+id/email_edit_text"
+        app:layout_constraintTop_toBottomOf="@+id/email_edit_text_entrance"
         tools:layout_editor_absoluteX="103dp" />
 
     <Button
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:text="@string/sign_in_button_string"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTextPassword"
+        app:layout_constraintTop_toBottomOf="@+id/password_edit_text_entrance"
         style="@style/AppTheme"
         tools:layout_editor_absoluteX="159dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

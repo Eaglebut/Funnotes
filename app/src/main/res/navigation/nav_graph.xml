@@ -9,11 +9,6 @@
         android:name="ru.eaglebutt.funnotes.fragments.TodayFragment"
         android:label="fragment_today"
         tools:layout="@layout/fragment_event_list">
-        <action
-            android:id="@+id/action_todayFragment_to_startFragment"
-            app:destination="@id/registration_graph"
-            app:popUpTo="@id/nav_graph"
-            app:popUpToInclusive="true" />
     </fragment>
     <navigation
         android:id="@+id/registration_graph"
@@ -26,7 +21,7 @@
             <action
                 android:id="@+id/action_entranceFragment_to_todayFragment"
                 app:destination="@id/todayFragment"
-                app:popUpTo="@id/nav_graph"
+                app:popUpTo="@id/startFragment"
                 app:popUpToInclusive="true" />
         </fragment>
         <fragment
@@ -56,10 +51,11 @@
             <action
                 android:id="@+id/action_startFragment_to_registrationFragment"
                 app:destination="@id/registrationFragment" />
-            <action
-                android:id="@+id/action_startFragment_to_entranceFragment"
-                app:destination="@id/entranceFragment" />
+
         </fragment>
+        <action
+            android:id="@+id/action_startFragment_to_entranceFragment"
+            app:destination="@id/entranceFragment" />
     </navigation>
     <fragment
         android:id="@+id/tasksFragment"
@@ -81,4 +77,9 @@
         android:name="ru.eaglebutt.funnotes.fragments.NewTaskFragment"
         android:label="fragment_new_task"
         tools:layout="@layout/fragment_new_task" />
+    <action
+        android:id="@+id/action_to_startFragment"
+        app:destination="@id/registration_graph"
+        app:popUpTo="@id/nav_graph"
+        app:popUpToInclusive="true" />
 </navigation>

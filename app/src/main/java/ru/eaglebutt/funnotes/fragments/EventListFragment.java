@@ -59,6 +59,7 @@ public abstract class EventListFragment extends Fragment {
     private void checkUser(View view) {
         eventRepository = EventRepository.getInstance(view.getContext());
         userRepository = UserRepository.getInstance(view.getContext());
+        userRepository.getUserFromDB();
         BottomNavigationView bottomNavigationView = view.getRootView().findViewById(R.id.bottom_navigation);
         bottomNavigationView.setVisibility(View.VISIBLE);
         try {
@@ -68,7 +69,7 @@ public abstract class EventListFragment extends Fragment {
         }
         if (userRepository.getObservableUser().get() == null) {
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_todayFragment_to_startFragment);
+                    .navigate(R.id.action_to_startFragment);
             bottomNavigationView.setVisibility(View.INVISIBLE);
         }
     }

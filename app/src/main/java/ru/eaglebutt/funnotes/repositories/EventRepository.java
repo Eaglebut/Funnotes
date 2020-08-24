@@ -61,48 +61,44 @@ public class EventRepository {
     }
 
     public synchronized void addEvent(Event event) {
-        if (type == ALL_DATA)
-            new AddEventTask(GetUserAndEvents.class).execute(event);
-        else if (type == TODAY_DATA)
-            new AddEventTask(GetTodayTasks.class).execute(event);
+            new AddEventTask().execute(event);
     }
 
     public synchronized void deleteEvent(int id) {
-        if (type == ALL_DATA)
-            new DeleteEventTask(GetUserAndEvents.class).execute(id);
-        else if (type == TODAY_DATA)
-            new DeleteEventTask(GetTodayTasks.class).execute(id);
+        new DeleteEventTask().execute(id);
     }
 
     public synchronized void updateEvent(Event event) {
-        if (type == ALL_DATA)
-            new UpdateEventTask(GetUserAndEvents.class).execute(event);
-        else if (type == TODAY_DATA)
-            new UpdateEventTask(GetTodayTasks.class).execute(event);
+        new UpdateEventTask().execute(event);
     }
 
     public synchronized void synchronizeWithServer() {
         if (isSynchronize)
             return;
-        new Thread(() -> {
-            isSynchronize = true;
-            while (!db.eventDAO().getNotUpdatedEvents().isEmpty()) {
-            }
-            isSynchronize = false;
-        }).start();
         List<Event> notUpdatedList = db.eventDAO().getNotUpdatedEvents();
         for (Event event : notUpdatedList) {
+            isSynchronize = true;
             if (event.getStatus() == Event.STATUSES.NEW) {
-                addEvent(event);
+                new AddEventTask().doInBackground(event);
             } else if (event.getStatus() == Event.STATUSES.DELETED) {
-                deleteEvent(event.getLocalId());
+                new DeleteEventTask().doInBackground(event.getLocalId());
             } else if (event.getStatus() == Event.STATUSES.UPDATED) {
-                updateEvent(event);
+                new UpdateEventTask().doInBackground(event);
             }
         }
     }
 
+    private Class<? extends AsyncTask<Void, Void, Void>> getUpdateTask() {
+        if (type == ALL_DATA)
+            return LoadAllEventsFromDB.class;
+        else if (type == TODAY_DATA)
+            return LoadTodayEventsFromDB.class;
+        return null;
+    }
+
     private synchronized boolean beforeStart() {
+        if (isSynchronize)
+            return false;
         /*if (!db.eventDAO().getNotUpdatedEvents().isEmpty())
             synchronizeWithServer();
          */
@@ -138,15 +134,14 @@ public class EventRepository {
         protected AsyncTask<Void, Void, Void> onResponseUpdateListTask;
         private AsyncTask<Void, Void, Void> updateListTask;
 
-        public <UpdateTask extends AsyncTask<Void, Void, Void>> EventAsyncTask(Class<UpdateTask> UpdateListTask) {
+        public EventAsyncTask() {
             try {
-                updateListTask = UpdateListTask.newInstance();
-                onResponseUpdateListTask = UpdateListTask.newInstance();
+                onResponseUpdateListTask = getUpdateTask().newInstance();
+                updateListTask = getUpdateTask().newInstance();
             } catch (IllegalAccessException | InstantiationException e) {
                 e.printStackTrace();
             }
         }
-
 
         @Override
         protected void onPostExecute(Void aVoid) {
@@ -156,10 +151,6 @@ public class EventRepository {
     }
 
     private class AddEventTask extends EventAsyncTask<Event> {
-
-        public <T extends AsyncTask<Void, Void, Void>> AddEventTask(Class<T> UpdateListTask) {
-            super(UpdateListTask);
-        }
 
         @Override
         protected Void doInBackground(Event... events) {
@@ -179,7 +170,9 @@ public class EventRepository {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        onResponseUpdateListTask.execute();
+                        if (!isSynchronize)
+                            onResponseUpdateListTask.execute();
+                        isSynchronize = false;
                     }
                 }
 
@@ -192,10 +185,6 @@ public class EventRepository {
     }
 
     private class DeleteEventTask extends EventAsyncTask<Integer> {
-
-        public <T extends AsyncTask<Void, Void, Void>> DeleteEventTask(Class<T> UpdateListTask) {
-            super(UpdateListTask);
-        }
 
         @Override
         protected Void doInBackground(Integer... integers) {
@@ -225,7 +214,9 @@ public class EventRepository {
             deleteEvent.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                    onResponseUpdateListTask.execute();
+                    if (!isSynchronize)
+                        onResponseUpdateListTask.execute();
+                    isSynchronize = false;
                 }
 
                 @Override
@@ -237,10 +228,6 @@ public class EventRepository {
     }
 
     private class UpdateEventTask extends EventAsyncTask<Event> {
-
-        public <T extends AsyncTask<Void, Void, Void>> UpdateEventTask(Class<T> UpdateListTask) {
-            super(UpdateListTask);
-        }
 
         @Override
         protected Void doInBackground(Event... events) {
@@ -258,7 +245,9 @@ public class EventRepository {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        onResponseUpdateListTask.execute();
+                        if (!isSynchronize)
+                            onResponseUpdateListTask.execute();
+                        isSynchronize = false;
                     }
                 }
 
@@ -283,13 +272,14 @@ public class EventRepository {
     private class GetUserAndEvents extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            if (beforeStart()) {
-                return null;
-            }
+            userRepository.getUser();
             User user = userRepository.getObservableUser().get();
             if (user == null) {
                 return null;
             }
+            eventList = db.eventDAO().getEvents();
+            if (!db.eventDAO().getNotUpdatedEvents().isEmpty())
+                synchronizeWithServer();
             Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(user.getEmail(), user.getPassword());
             responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
                 @Override

@@ -4,75 +4,81 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import ru.eaglebutt.funnotes.R;
+import com.google.android.material.snackbar.Snackbar;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link EntranceFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import ru.eaglebutt.funnotes.R;
+import ru.eaglebutt.funnotes.model.User;
+import ru.eaglebutt.funnotes.repositories.UserRepository;
+
+
 public class EntranceFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private EditText emailEditText;
+    private EditText passwordEditText;
+    private Button logInButton;
+    private Toolbar toolbar;
+    private UserRepository repository;
+    private NavController controller;
+    private LiveData<User> liveUser;
 
     public EntranceFragment() {
-        // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment EntranceFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static EntranceFragment newInstance(String param1, String param2) {
-        EntranceFragment fragment = new EntranceFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static EntranceFragment newInstance() {
+        return new EntranceFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_entrance, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        view.findViewById(R.id.log_in_button).setOnClickListener(v -> {
-            NavController controller = NavHostFragment.findNavController(this);
-            NavHostFragment.findNavController(this).navigate(R.id.action_entranceFragment_to_todayFragment);
+        setUp(view);
+        logInButton.setOnClickListener(v -> {
+            User user = new User();
+            user.setEmail(emailEditText.getText().toString());
+            user.setPassword(passwordEditText.getText().toString());
+            if (user.getEmail().isEmpty() || user.getPassword().isEmpty()) {
+                Snackbar.make(view, R.string.missing_value_string, Snackbar.LENGTH_SHORT).show();
+            } else {
+                repository.logInUser(user);
+            }
+        });
+    }
+
+    private void setUp(View view) {
+
+        repository = UserRepository.getInstance(view.getContext());
+        liveUser = repository.getLiveUser();
+        controller = NavHostFragment.findNavController(this);
+        emailEditText = view.findViewById(R.id.email_edit_text_entrance);
+        passwordEditText = view.findViewById(R.id.password_edit_text_entrance);
+        logInButton = view.findViewById(R.id.log_in_button);
+        toolbar = view.getRootView().findViewById(R.id.app_toolbar);
+        liveUser.removeObservers(getViewLifecycleOwner());
+        liveUser.observe(getViewLifecycleOwner(), user1 -> {
+            if (user1 != null)
+                controller.navigate(R.id.action_entranceFragment_to_todayFragment);
         });
     }
 }

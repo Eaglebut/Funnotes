@@ -17,4 +17,5 @@
     <string name="profile_string">Профиль</string>
     <string name="edit_string">Редактировать</string>
     <string name="edit_profile_string">Редактировать</string>
+    <string name="missing_value_string">Поля не должны быть пустыми</string>
 </resources>

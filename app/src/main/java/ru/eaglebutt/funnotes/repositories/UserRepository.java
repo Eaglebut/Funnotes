@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.databinding.ObservableField;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -18,6 +20,7 @@ public class UserRepository {
     private MainDB db;
     private APIService apiService;
     private ObservableField<User> observableUser = new ObservableField<>();
+    private MutableLiveData<User> liveUser = new MutableLiveData<>();
 
     private UserRepository(Context context) {
         db = MainDB.get(context);
@@ -28,6 +31,14 @@ public class UserRepository {
         if (INSTANCE == null)
             INSTANCE = new UserRepository(context);
         return INSTANCE;
+    }
+
+    private void updateLiveUser() {
+        liveUser.postValue(observableUser.get());
+    }
+
+    public LiveData<User> getLiveUser() {
+        return liveUser;
     }
 
     public ObservableField<User> getObservableUser() {
@@ -60,6 +71,10 @@ public class UserRepository {
 
     public synchronized void getUser() {
         new GetUserTask().execute();
+    }
+
+    public synchronized void logInUser(User user) {
+        new LogInUserTask().execute(user);
     }
 
     private class UpdateUserInDBTask extends AsyncTask<User, Void, Void> {
@@ -97,38 +112,10 @@ public class UserRepository {
         }
     }
 
-    private class AddUserTask extends AsyncTask<User, Void, Void> {
-        @Override
-        protected Void doInBackground(User... users) {
-            User user = users[0];
-            db.userDAO().deleteUser();
-            db.eventDAO().deleteAllEvents();
-            observableUser.set(null);
-            Call<Void> putUser = apiService.putUser(user);
-            putUser.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    if (response.isSuccessful()) {
-                        new OnAddUserResponseTask().execute(user);
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                }
-            });
-            return null;
-        }
+    public void logOut() {
+        new LogOut().execute();
     }
 
-    private class OnAddUserResponseTask extends AsyncTask<User, Void, Void> {
-        @Override
-        protected Void doInBackground(User... users) {
-            db.userDAO().insert(users[0]);
-            observableUser.set(db.userDAO().getUser());
-            return null;
-        }
-    }
 
     private class DeleteUserTask extends AsyncTask<Void, Void, Void> {
 
@@ -164,42 +151,31 @@ public class UserRepository {
         }
     }
 
-    private class UpdateUserTask extends AsyncTask<User, Void, Void> {
-
+    private class AddUserTask extends AsyncTask<User, Void, Void> {
         @Override
         protected Void doInBackground(User... users) {
-
-            if (observableUser.get() == null) {
-                return null;
-            }
             User user = users[0];
-            Call<Void> updateUser = apiService.updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), user);
-            updateUser.enqueue(new Callback<Void>() {
+            db.userDAO().deleteUser();
+            db.eventDAO().deleteAllEvents();
+            observableUser.set(null);
+            Call<Void> putUser = apiService.putUser(user);
+            putUser.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-
                     if (response.isSuccessful()) {
-                        new OnAddUserResponseTask().execute(users);
+                        new OnResponseGetUserTask().execute(user);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-
                 }
             });
             return null;
         }
     }
 
-    private class OnResponseUpdateUserTask extends AsyncTask<User, Void, Void> {
 
-        @Override
-        protected Void doInBackground(User... users) {
-
-            return null;
-        }
-    }
 
     private class GetUserTask extends AsyncTask<Void, Void, Void> {
 
@@ -227,6 +203,34 @@ public class UserRepository {
         }
     }
 
+    private class UpdateUserTask extends AsyncTask<User, Void, Void> {
+
+        @Override
+        protected Void doInBackground(User... users) {
+
+            if (observableUser.get() == null) {
+                return null;
+            }
+            User user = users[0];
+            Call<Void> updateUser = apiService.updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), user);
+            updateUser.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+
+                    if (response.isSuccessful()) {
+                        new OnResponseGetUserTask().execute(users);
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+
+                }
+            });
+            return null;
+        }
+    }
+
     private class OnResponseGetUserTask extends AsyncTask<User, Void, Void> {
         @Override
         protected Void doInBackground(User... users) {
@@ -234,6 +238,54 @@ public class UserRepository {
             db.userDAO().deleteUser();
             db.userDAO().insert(user);
             observableUser.set(db.userDAO().getUser());
+            return null;
+        }
+    }
+
+    private class OnResponseLogInTask extends AsyncTask<User, Void, Void> {
+        @Override
+        protected Void doInBackground(User... users) {
+            User user = users[0];
+            db.userDAO().deleteUser();
+            db.userDAO().insert(user);
+            observableUser.set(db.userDAO().getUser());
+            updateLiveUser();
+            return null;
+        }
+    }
+
+    private class LogInUserTask extends AsyncTask<User, Void, Void> {
+
+        @Override
+        protected Void doInBackground(User... users) {
+            User user = users[0];
+            Call<User> getUserCall = apiService.getUser(user.getEmail(), user.getPassword());
+            getUserCall.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    if (response.isSuccessful())
+                        if (response.body() != null) {
+                            new OnResponseLogInTask().execute(response.body());
+                        }
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+
+                }
+            });
+            return null;
+        }
+    }
+
+    private class LogOut extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            db.eventDAO().deleteAllEvents();
+            db.userDAO().deleteUser();
+            observableUser.set(null);
+            updateLiveUser();
             return null;
         }
     }

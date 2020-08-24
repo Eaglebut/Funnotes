@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -41,8 +42,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentProfileBinding.inflate(inflater, container, false);
-        View view = binding.getRoot();
-        return view;
+        return binding.getRoot();
     }
 
     @Override
@@ -55,6 +55,12 @@ public class ProfileFragment extends Fragment {
         checkUser(view);
         setUpToolbar(view);
 
+        Button exitButton = view.findViewById(R.id.exit_button);
+        exitButton.setOnClickListener(v -> {
+            repository.logOut();
+            checkUser(view);
+
+        });
     }
 
     private void checkUser(View view) {
@@ -67,7 +73,7 @@ public class ProfileFragment extends Fragment {
         }
         if (repository.getObservableUser().get() == null) {
             NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_todayFragment_to_startFragment);
+                    .navigate(R.id.action_to_startFragment);
             bottomNavigationView.setVisibility(View.INVISIBLE);
         }
     }
