@@ -13,11 +13,13 @@ import java.util.List;
 
 import ru.eaglebutt.funnotes.R;
 import ru.eaglebutt.funnotes.model.Event;
+import ru.eaglebutt.funnotes.repositories.EventRepository;
 
 public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
 
     private static final String TAG = "TestAdapter";
     private List<Event> mDataSet;
+    private EventRepository repository;
 
     public EventsAdapter(List<Event> mDataSet) {
         this.mDataSet = new ArrayList<>(mDataSet);
@@ -33,8 +35,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
     public EventViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.event_layout, parent, false);
+        repository = EventRepository.getInstance(view.getContext());
         return new EventViewHolder(view);
     }
+
 
     @Override
     public void onBindViewHolder(@NonNull EventViewHolder holder, int position) {
@@ -47,6 +51,10 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
         holder.setTime(event.getStartTime());
         holder.setDescription(event.getDescription());
         holder.setEndTime(event.getEndTime());
+        holder.itemView.setOnLongClickListener(v -> {
+            repository.deleteEvent(event.getLocalId());
+            return false;
+        });
     }
 
     @Override

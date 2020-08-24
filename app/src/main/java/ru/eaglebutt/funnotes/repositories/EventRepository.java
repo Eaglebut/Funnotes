@@ -88,13 +88,7 @@ public class EventRepository {
         }
     }
 
-    private Class<? extends AsyncTask<Void, Void, Void>> getUpdateTask() {
-        if (type == ALL_DATA)
-            return LoadAllEventsFromDB.class;
-        else if (type == TODAY_DATA)
-            return LoadTodayEventsFromDB.class;
-        return null;
-    }
+
 
     private synchronized boolean beforeStart() {
         if (isSynchronize)
@@ -135,11 +129,12 @@ public class EventRepository {
         private AsyncTask<Void, Void, Void> updateListTask;
 
         public EventAsyncTask() {
-            try {
-                onResponseUpdateListTask = getUpdateTask().newInstance();
-                updateListTask = getUpdateTask().newInstance();
-            } catch (IllegalAccessException | InstantiationException e) {
-                e.printStackTrace();
+            if (type == ALL_DATA) {
+                onResponseUpdateListTask = new GetUserAndEvents();
+                updateListTask = new LoadAllEventsFromDB();
+            } else if (type == TODAY_DATA) {
+                onResponseUpdateListTask = new GetTodayTasks();
+                updateListTask = new LoadTodayEventsFromDB();
             }
         }
 
@@ -345,6 +340,10 @@ public class EventRepository {
     }
 
     public class LoadTodayEventsFromDB extends AsyncTask<Void, Void, Void> {
+
+        public LoadTodayEventsFromDB() {
+        }
+
         @Override
         protected Void doInBackground(Void... voids) {
             eventList.clear();

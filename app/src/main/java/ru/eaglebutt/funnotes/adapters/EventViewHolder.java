@@ -3,7 +3,6 @@ package ru.eaglebutt.funnotes.adapters;
 import android.graphics.Paint;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -18,7 +17,8 @@ import ru.eaglebutt.funnotes.R;
 
 public class EventViewHolder extends RecyclerView.ViewHolder {
 
-    int paintFlags;
+    private int id;
+    private int paintFlags;
     private TextView titleView;
     private TextView timeView;
     private int visibility = View.GONE;
@@ -37,17 +37,16 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
         descriptionView = itemView.findViewById(R.id.description_my_day);
         isDoneCheckBox = itemView.findViewById(R.id.is_done_my_day);
         paintFlags = titleView.getPaintFlags();
-        isDoneCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    titleView.setPaintFlags(titleView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
-                } else {
-                    titleView.setPaintFlags(paintFlags);
-                }
+        isDoneCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                titleView.setPaintFlags(titleView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            } else {
+                titleView.setPaintFlags(paintFlags);
             }
         });
         setVisibility(visibility);
+
+
         itemView.setOnClickListener(v -> {
             if (getVisibility() == View.GONE) {
                 setVisibility(View.VISIBLE);
