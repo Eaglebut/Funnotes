@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,12 +17,16 @@ import ru.eaglebutt.funnotes.R;
 public class SecondRegistrationFragment extends Fragment {
 
 
+    private Button registerButton;
+    private EditText nameEditText;
+    private EditText surnameEditText;
+
+
     public SecondRegistrationFragment() {
     }
 
     public static SecondRegistrationFragment newInstance() {
-        SecondRegistrationFragment fragment = new SecondRegistrationFragment();
-        return fragment;
+        return new SecondRegistrationFragment();
     }
 
     @Override
@@ -41,6 +47,9 @@ public class SecondRegistrationFragment extends Fragment {
             NavHostFragment.findNavController(SecondRegistrationFragment.this)
                     .navigate(R.id.action_secondRegistrationFragment_to_entranceFragment);
         });
+    }
+
+    private void setUp() {
 
     }
 }
