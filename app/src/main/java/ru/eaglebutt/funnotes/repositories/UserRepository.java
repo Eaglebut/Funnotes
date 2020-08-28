@@ -155,15 +155,13 @@ public class UserRepository {
         @Override
         protected Void doInBackground(User... users) {
             User user = users[0];
-            db.userDAO().deleteUser();
-            db.eventDAO().deleteAllEvents();
-            observableUser.set(null);
             Call<Void> putUser = apiService.putUser(user);
             putUser.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
                     if (response.isSuccessful()) {
-                        new OnResponseGetUserTask().execute(user);
+                        observableUser.set(user);
+                        getUser();
                     }
                 }
 
@@ -218,7 +216,7 @@ public class UserRepository {
                 public void onResponse(Call<Void> call, Response<Void> response) {
 
                     if (response.isSuccessful()) {
-                        new OnResponseGetUserTask().execute(users);
+                        getUser();
                     }
                 }
 
@@ -238,8 +236,11 @@ public class UserRepository {
             db.userDAO().deleteUser();
             db.userDAO().insert(user);
             observableUser.set(db.userDAO().getUser());
+            updateLiveUser();
             return null;
         }
+
+
     }
 
     private class OnResponseLogInTask extends AsyncTask<User, Void, Void> {

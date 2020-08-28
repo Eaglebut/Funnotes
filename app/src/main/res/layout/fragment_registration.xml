@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autoLink="email"
+            android:inputType="textEmailAddress"
             android:hint="@string/e_mail_string"
             app:layout_constraintBottom_toTopOf="@+id/password_edit_text_registration"
             app:layout_constraintTop_toBottomOf="@+id/textView"

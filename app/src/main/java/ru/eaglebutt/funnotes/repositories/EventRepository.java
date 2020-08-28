@@ -142,7 +142,6 @@ public class EventRepository {
         protected void onPostExecute(Void aVoid) {
             updateListTask.execute();
         }
-
     }
 
     private class AddEventTask extends EventAsyncTask<Event> {
