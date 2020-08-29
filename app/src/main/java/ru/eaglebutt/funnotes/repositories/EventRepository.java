@@ -4,9 +4,11 @@ package ru.eaglebutt.funnotes.repositories;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import androidx.databinding.ObservableArrayList;
+import androidx.databinding.ObservableBoolean;
+import androidx.databinding.ObservableList;
 import androidx.lifecycle.MutableLiveData;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -27,12 +29,23 @@ public class EventRepository {
     private static EventRepository INSTANCE = null;
     private UserRepository userRepository;
 
-    private List<Event> eventList = new ArrayList<>();
+
+    private ObservableList<Event> eventList = new ObservableArrayList<>();
     private MutableLiveData<List<Event>> liveEventList = new MutableLiveData<>();
     private static int TODAY_DATA = 0;
     private static int ALL_DATA = 1;
     private int type = 1;
     private boolean isSynchronize = false;
+    private boolean isAddingTask = false;
+    private ObservableBoolean isLoading = new ObservableBoolean(false);
+
+    public void setEventList(ObservableList<Event> eventList) {
+        this.eventList = eventList;
+    }
+
+    public ObservableBoolean getIsLoading() {
+        return isLoading;
+    }
 
     private EventRepository(Context context) {
         db = MainDB.get(context);
@@ -88,8 +101,6 @@ public class EventRepository {
         }
     }
 
-
-
     private synchronized boolean beforeStart() {
         if (isSynchronize)
             return false;
@@ -97,9 +108,9 @@ public class EventRepository {
             synchronizeWithServer();
          */
         if (type == ALL_DATA) {
-            new LoadAllEventsFromDB().execute();
+            new LoadAllEventsFromDB().doInBackground();
         } else {
-            new LoadTodayEventsFromDB().execute();
+            new LoadTodayEventsFromDB().doInBackground();
         }
         return false;
     }
@@ -148,9 +159,11 @@ public class EventRepository {
 
         @Override
         protected Void doInBackground(Event... events) {
-            if (beforeStart()) {
+            if (beforeStart() || isAddingTask) {
                 return null;
             }
+            isAddingTask = true;
+            isLoading.set(true);
             Event event = events[0];
             if (event.getStatus() != Event.STATUSES.NEW) {
                 event.update();
@@ -158,6 +171,7 @@ public class EventRepository {
                 event.setStatus(Event.STATUSES.NEW);
                 db.eventDAO().insert(event);
             }
+
             User user = userRepository.getObservableUser().get();
             Call<Void> putEvent = apiService.putEvent(user.getEmail(), user.getPassword(), event);
             putEvent.enqueue(new Callback<Void>() {
@@ -167,11 +181,15 @@ public class EventRepository {
                         if (!isSynchronize)
                             onResponseUpdateListTask.execute();
                         isSynchronize = false;
+                        isAddingTask = false;
+                        isLoading.set(false);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
+                    isAddingTask = false;
+                    isLoading.set(false);
                 }
             });
             return null;
@@ -185,18 +203,22 @@ public class EventRepository {
             if (beforeStart()) {
                 return null;
             }
+            isLoading.set(true);
             int id = integers[0];
             if (id == 0) {
+                isLoading.set(false);
                 return null;
             }
             Event event = db.eventDAO().findEventByLocalId(id);
 
             if (event == null) {
+                isLoading.set(false);
                 return null;
             }
 
             if (event.getStatus() == Event.STATUSES.NEW) {
                 db.eventDAO().delete(event);
+                isLoading.set(false);
                 return null;
             } else {
                 event.setStatus(Event.STATUSES.DELETED);
@@ -211,10 +233,12 @@ public class EventRepository {
                     if (!isSynchronize)
                         onResponseUpdateListTask.execute();
                     isSynchronize = false;
+                    isLoading.set(false);
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
+                    isLoading.set(false);
                 }
             });
             return null;
@@ -228,6 +252,7 @@ public class EventRepository {
             if (beforeStart()) {
                 return null;
             }
+            isLoading.set(true);
             Event event = events[0];
             event.setServerId(db.eventDAO().findEventByLocalId(event.getLocalId()).getServerId());
             event.setStatus(Event.STATUSES.UPDATED);
@@ -242,11 +267,13 @@ public class EventRepository {
                         if (!isSynchronize)
                             onResponseUpdateListTask.execute();
                         isSynchronize = false;
+                        isLoading.set(false);
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
+                    isLoading.set(false);
                 }
             });
             return null;
@@ -266,19 +293,23 @@ public class EventRepository {
     private class GetUserAndEvents extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
+            isLoading.set(true);
             userRepository.getUser();
             User user = userRepository.getObservableUser().get();
             if (user == null) {
+                isLoading.set(false);
                 return null;
             }
-            eventList = db.eventDAO().getEvents();
+            isLoading.set(true);
+            eventList.clear();
+            eventList.addAll(db.eventDAO().getEvents());
             if (!db.eventDAO().getNotUpdatedEvents().isEmpty())
                 synchronizeWithServer();
             Call<AllUsersResponseData> responseDataCall = apiService.getAllUserData(user.getEmail(), user.getPassword());
             responseDataCall.enqueue(new Callback<AllUsersResponseData>() {
                 @Override
                 public void onResponse(Call<AllUsersResponseData> call, Response<AllUsersResponseData> response) {
-
+                    isLoading.set(false);
                     if (!response.isSuccessful()) {
                         return;
                     }
@@ -290,6 +321,7 @@ public class EventRepository {
 
                 @Override
                 public void onFailure(Call<AllUsersResponseData> call, Throwable t) {
+                    isLoading.set(false);
                 }
             });
             return null;

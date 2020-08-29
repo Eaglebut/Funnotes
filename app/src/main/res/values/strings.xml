@@ -18,4 +18,13 @@
     <string name="edit_string">Редактировать</string>
     <string name="edit_profile_string">Редактировать</string>
     <string name="missing_value_string">Поля не должны быть пустыми</string>
+    <string name="task_string">Задача</string>
+    <string name="enter_task_name_string">Введите назание</string>
+    <string name="task_description_string">Описание задачи</string>
+    <string name="enter_task_description_string">Введите краткое описание</string>
+    <string name="add_reminder_string">Добавить напоминание</string>
+    <string name="create_string">Создать</string>
+    <string name="cancel_string">Отмена</string>
+    <string name="set_date_string">Задать дату выполнения</string>
+    <string name="save_string">Сохранить</string>
 </resources>

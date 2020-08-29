@@ -1,11 +1,13 @@
 package ru.eaglebutt.funnotes.adapters;
 
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -20,9 +22,11 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
     private static final String TAG = "TestAdapter";
     private List<Event> mDataSet;
     private EventRepository repository;
+    private NavController controller;
 
-    public EventsAdapter(List<Event> mDataSet) {
+    public EventsAdapter(List<Event> mDataSet, NavController controller) {
         this.mDataSet = new ArrayList<>(mDataSet);
+        this.controller = controller;
     }
 
     public synchronized void setData(List<Event> mDataSet) {
@@ -55,6 +59,13 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
             repository.deleteEvent(event.getLocalId());
             return false;
         });
+
+        holder.itemView.findViewById(R.id.edit_button_event).setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putInt("id", position);
+            controller.navigate(R.id.action_to_edit_fragment, bundle);
+        });
+
     }
 
     @Override

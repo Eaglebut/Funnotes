@@ -82,4 +82,17 @@
         app:destination="@id/registration_graph"
         app:popUpTo="@id/nav_graph"
         app:popUpToInclusive="true" />
+    <fragment
+        android:id="@+id/editTaskFragment"
+        android:name="ru.eaglebutt.funnotes.fragments.EditTaskFragment"
+        android:label="fragment_edit_task"
+        tools:layout="@layout/fragment_edit_task" />
+    <action
+        android:id="@+id/action_to_edit_fragment"
+        app:destination="@id/editTaskFragment">
+        <argument
+            android:name="id"
+            android:defaultValue="0"
+            app:argType="integer" />
+    </action>
 </navigation>

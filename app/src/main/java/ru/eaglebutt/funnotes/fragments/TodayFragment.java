@@ -1,20 +1,34 @@
 package ru.eaglebutt.funnotes.fragments;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
 import ru.eaglebutt.funnotes.R;
+import ru.eaglebutt.funnotes.databinding.FragmentEventListBinding;
 
 
-public class TodayFragment extends EventListFragment {
+public class TodayFragment extends EventListFragment<FragmentEventListBinding> {
 
 
     public static TodayFragment newInstance() {
         return new TodayFragment();
     }
+
+    @NonNull
+    @Override
+    public FragmentEventListBinding onCreateBinding(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentEventListBinding.inflate(inflater, container, false);
+        return binding;
+    }
+
 
     @Override
     protected void setUpToolbar(View view) {

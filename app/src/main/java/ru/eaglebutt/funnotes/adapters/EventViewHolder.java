@@ -30,12 +30,12 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
 
     public EventViewHolder(@NonNull View itemView) {
         super(itemView);
-        titleView = itemView.findViewById(R.id.title_my_day);
-        timeView = itemView.findViewById(R.id.time_my_day);
-        editButton = itemView.findViewById(R.id.edit_button_my_day);
-        endTimeView = itemView.findViewById(R.id.end_time_my_day);
-        descriptionView = itemView.findViewById(R.id.description_my_day);
-        isDoneCheckBox = itemView.findViewById(R.id.is_done_my_day);
+        titleView = itemView.findViewById(R.id.title_event);
+        timeView = itemView.findViewById(R.id.time_event);
+        editButton = itemView.findViewById(R.id.edit_button_event);
+        endTimeView = itemView.findViewById(R.id.end_time_event);
+        descriptionView = itemView.findViewById(R.id.description_event);
+        isDoneCheckBox = itemView.findViewById(R.id.is_done_event);
         paintFlags = titleView.getPaintFlags();
         isDoneCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
@@ -54,6 +54,8 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
                 setVisibility(View.GONE);
             }
         });
+
+
     }
 
 

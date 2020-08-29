@@ -8,8 +8,10 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +26,7 @@ import ru.eaglebutt.funnotes.repositories.UserRepository;
 import ru.eaglebutt.funnotes.view_models.EventListViewModel;
 
 
-public abstract class EventListFragment extends Fragment {
+public abstract class EventListFragment<Binding extends ViewDataBinding> extends Fragment {
     protected EventRepository eventRepository;
     protected UserRepository userRepository;
     protected SwipeRefreshLayout refreshLayout;
@@ -33,16 +35,25 @@ public abstract class EventListFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private EventsAdapter mAdapter;
     private EventListViewModel viewModel;
+    protected Binding binding;
+    private NavController controller;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    @NonNull
+    public abstract Binding onCreateBinding(LayoutInflater inflater, ViewGroup container, Bundle
+            savedInstanceState);
+
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_event_list, container, false);
+    public final View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
+            savedInstanceState) {
+        binding = onCreateBinding(inflater, container, savedInstanceState);
+        return binding.getRoot();
     }
 
     @Override
@@ -62,14 +73,15 @@ public abstract class EventListFragment extends Fragment {
         userRepository.getUserFromDB();
         BottomNavigationView bottomNavigationView = view.getRootView().findViewById(R.id.bottom_navigation);
         bottomNavigationView.setVisibility(View.VISIBLE);
+        controller = NavHostFragment.findNavController(this);
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         if (userRepository.getObservableUser().get() == null) {
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_to_startFragment);
+
+            controller.navigate(R.id.action_to_startFragment);
             bottomNavigationView.setVisibility(View.INVISIBLE);
         }
     }
@@ -92,7 +104,7 @@ public abstract class EventListFragment extends Fragment {
         recyclerView = view.findViewById(R.id.today_recycler_view);
         layoutManager = new LinearLayoutManager(view.getContext());
         recyclerView.setLayoutManager(layoutManager);
-        mAdapter = new EventsAdapter(eventRepository.getEventList());
+        mAdapter = new EventsAdapter(eventRepository.getEventList(), controller);
         recyclerView.setAdapter(mAdapter);
     }
 

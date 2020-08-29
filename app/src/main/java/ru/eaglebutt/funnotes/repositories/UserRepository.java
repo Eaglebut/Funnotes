@@ -239,8 +239,6 @@ public class UserRepository {
             updateLiveUser();
             return null;
         }
-
-
     }
 
     private class OnResponseLogInTask extends AsyncTask<User, Void, Void> {
@@ -290,6 +288,4 @@ public class UserRepository {
             return null;
         }
     }
-
-
 }

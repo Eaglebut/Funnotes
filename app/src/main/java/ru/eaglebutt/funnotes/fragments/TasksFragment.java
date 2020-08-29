@@ -1,11 +1,17 @@
 package ru.eaglebutt.funnotes.fragments;
 
+import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 import ru.eaglebutt.funnotes.R;
+import ru.eaglebutt.funnotes.databinding.FragmentEventListBinding;
 
 
-public class TasksFragment extends EventListFragment {
+public class TasksFragment extends EventListFragment<FragmentEventListBinding> {
 
     public TasksFragment() {
     }
@@ -14,6 +20,13 @@ public class TasksFragment extends EventListFragment {
         return new TasksFragment();
     }
 
+
+    @NonNull
+    @Override
+    public FragmentEventListBinding onCreateBinding(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentEventListBinding.inflate(inflater, container, false);
+        return binding;
+    }
 
     @Override
     protected void setUpToolbar(View view) {
