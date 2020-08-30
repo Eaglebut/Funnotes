@@ -4,62 +4,89 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+
+import com.google.android.material.snackbar.Snackbar;
 
 import ru.eaglebutt.funnotes.R;
+import ru.eaglebutt.funnotes.databinding.FragmentEditProfileBinding;
+import ru.eaglebutt.funnotes.model.User;
+import ru.eaglebutt.funnotes.repositories.UserRepository;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link EditProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class EditProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private FragmentEditProfileBinding binding;
+    private UserRepository repository;
+    private EditText nameEditText;
+    private EditText surnameEditText;
+    private EditText emailEditText;
+    private Button saveButton;
+    private Button editPasswordButton;
+    private Button cancelButton;
+    private NavController controller;
 
     public EditProfileFragment() {
-        // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment EditProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static EditProfileFragment newInstance(String param1, String param2) {
-        EditProfileFragment fragment = new EditProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static EditProfileFragment newInstance() {
+        return new EditProfileFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_edit_profile, container, false);
+        binding = FragmentEditProfileBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setUp();
+    }
+
+    private void setUp() {
+        nameEditText = binding.nameEditTextEditProfile;
+        surnameEditText = binding.surnameEditTextEditProfile;
+        emailEditText = binding.emailEditTextEditProfile;
+        saveButton = binding.saveButtonEditProfile;
+        cancelButton = binding.cancelButtonEditProfile;
+        editPasswordButton = binding.changePasswordButtonEditProfile;
+        repository = UserRepository.getInstance(getContext());
+        binding.setRepository(repository);
+        controller = NavHostFragment.findNavController(this);
+
+        saveButton.setOnClickListener(v -> {
+            if (nameEditText.getText().toString().isEmpty() || surnameEditText.getText().toString().isEmpty() || emailEditText.getText().toString().isEmpty()) {
+                Snackbar.make(getView(), R.string.missing_value_string, Snackbar.LENGTH_LONG).show();
+            } else {
+                User user = repository.getObservableUser().get();
+                user.setName(nameEditText.getText().toString());
+                user.setSurname(surnameEditText.getText().toString());
+                user.setEmail(emailEditText.getText().toString());
+                repository.updateUser(user);
+                getActivity().onBackPressed();
+            }
+        });
+
+        cancelButton.setOnClickListener(v -> getActivity().onBackPressed());
+
+        editPasswordButton.setOnClickListener(v -> controller.navigate(R.id.action_editProfileFragment_to_editPasswordFragment));
+
+    }
+
+
 }

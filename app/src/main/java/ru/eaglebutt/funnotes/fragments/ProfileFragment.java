@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -24,6 +25,7 @@ public class ProfileFragment extends Fragment {
     UserRepository repository;
     FragmentProfileBinding binding;
     Toolbar toolbar;
+    NavController controller;
 
     public ProfileFragment() {
     }
@@ -52,6 +54,7 @@ public class ProfileFragment extends Fragment {
         binding.setRepository(repository);
         repository.getUserFromDB();
         repository.getUser();
+        controller = NavHostFragment.findNavController(this);
         checkUser(view);
         setUpToolbar(view);
 
@@ -60,6 +63,10 @@ public class ProfileFragment extends Fragment {
             repository.logOut();
             checkUser(view);
 
+        });
+
+        binding.editProfileButton.setOnClickListener(v -> {
+            controller.navigate(R.id.action_profileFragment_to_editProfileFragment);
         });
     }
 
@@ -72,8 +79,7 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
         }
         if (repository.getObservableUser().get() == null) {
-            NavHostFragment.findNavController(this)
-                    .navigate(R.id.action_to_startFragment);
+            controller.navigate(R.id.action_to_startFragment);
             bottomNavigationView.setVisibility(View.INVISIBLE);
         }
     }

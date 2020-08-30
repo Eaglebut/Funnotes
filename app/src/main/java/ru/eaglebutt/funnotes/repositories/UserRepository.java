@@ -66,7 +66,7 @@ public class UserRepository {
     }
 
     public synchronized void updateUser(User user) {
-        new UpdateUserInDBTask().execute(user);
+        new UpdateUserTask().execute(user);
     }
 
     public synchronized void getUser() {
@@ -209,13 +209,14 @@ public class UserRepository {
             if (observableUser.get() == null) {
                 return null;
             }
+            observableUser.set(db.userDAO().getUser());
             User user = users[0];
             Call<Void> updateUser = apiService.updateUser(observableUser.get().getEmail(), observableUser.get().getPassword(), user);
             updateUser.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-
                     if (response.isSuccessful()) {
+                        observableUser.set(user);
                         getUser();
                     }
                 }
