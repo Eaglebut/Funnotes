@@ -9,10 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-
 import ru.eaglebutt.funnotes.R;
 
 public class EventViewHolder extends RecyclerView.ViewHolder {
@@ -63,22 +59,16 @@ public class EventViewHolder extends RecyclerView.ViewHolder {
         titleView.setText(title);
     }
 
-    public void setTime(long time) {
-        Timestamp timestamp = new Timestamp(time * 1_000);
-        DateFormat dateFormat = new SimpleDateFormat("EE, dd MMM HH:mm");
-        String strDate = dateFormat.format(timestamp);
-        timeView.setText(strDate);
+    public void setTime(String time) {
+        timeView.setText(time);
     }
 
     public void setDescription(String description) {
         descriptionView.setText(description);
     }
 
-    public void setEndTime(long time) {
-        Timestamp timestamp = new Timestamp(time * 1_000);
-        DateFormat dateFormat = new SimpleDateFormat("EE, dd MMM HH:mm");
-        String strDate = dateFormat.format(timestamp);
-        endTimeView.setText(strDate);
+    public void setEndTime(String time) {
+        endTimeView.setText(time);
     }
 
     public int getVisibility() {

@@ -4,12 +4,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import ru.eaglebutt.funnotes.databinding.FragmentEditTaskBinding;
+import ru.eaglebutt.funnotes.model.Event;
 import ru.eaglebutt.funnotes.repositories.EventRepository;
 
 
@@ -21,6 +23,9 @@ public class EditTaskFragment extends Fragment {
     private int id;
     private EventRepository repository;
     private FragmentEditTaskBinding binding;
+
+    private Button saveButton;
+    private Button cancelButton;
 
     public EditTaskFragment() {
     }
@@ -55,5 +60,18 @@ public class EditTaskFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         binding.setId(id);
         binding.setRepository(repository);
+        saveButton = binding.saveTaskButtonEditTask;
+        cancelButton = binding.cancelButtonEditTask;
+
+        saveButton.setOnClickListener(v -> {
+            Event event = repository.getEventList().get(id);
+            event.setTitle(binding.taskTitleEditTask.getText().toString());
+            event.setDescription(binding.taskDescriptionEditTask.getText().toString());
+            repository.updateEvent(event);
+            getActivity().onBackPressed();
+        });
+
+        cancelButton.setOnClickListener(v -> getActivity().onBackPressed());
+
     }
 }

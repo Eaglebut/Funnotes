@@ -9,6 +9,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 @Entity(tableName = "events")
 public class Event {
@@ -58,6 +60,16 @@ public class Event {
         this.lastUpdateTime = event.lastUpdateTime;
         this.status = event.status;
         this.created = event.created;
+    }
+
+    public String getStartTimeString() {
+        DateFormat dateFormat = new SimpleDateFormat("EE, dd MMM HH:mm");
+        return dateFormat.format(startTime * 1_000);
+    }
+
+    public String getEndTimeString() {
+        DateFormat dateFormat = new SimpleDateFormat("EE, dd MMM HH:mm");
+        return dateFormat.format(startTime * 1_000);
     }
 
     public void setCreated(long created) {

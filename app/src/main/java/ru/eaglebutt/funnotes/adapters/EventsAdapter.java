@@ -52,9 +52,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventViewHolder> {
         }
         Event event = mDataSet.get(position);
         holder.setTitle(event.getTitle());
-        holder.setTime(event.getStartTime());
+        holder.setTime(event.getStartTimeString());
         holder.setDescription(event.getDescription());
-        holder.setEndTime(event.getEndTime());
+        holder.setEndTime(event.getEndTimeString());
         holder.itemView.setOnLongClickListener(v -> {
             repository.deleteEvent(event.getLocalId());
             return false;
