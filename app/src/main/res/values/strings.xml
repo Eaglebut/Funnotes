@@ -28,4 +28,8 @@
     <string name="set_date_string">Задать дату выполнения</string>
     <string name="save_string">Сохранить</string>
     <string name="edit_password_string">Изменить пароль</string>
+    <string name="password_editing_string">Изменение пароля</string>
+    <string name="new_password_hint_string">Новый пароль</string>
+    <string name="passwords_not_match_string">Пароли не совпадают</string>
+    <string name="wrong_password_string">Неверный пароль</string>
 </resources>
